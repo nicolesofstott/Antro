@@ -45,27 +45,5 @@ cd back-end
 node server.js
 ### Open http://localhost:5050/index.html
 
-## Folder Structure 
-antro/
-
-├── front-end/
-
-│   ├── index.html
-│   ├── create.html
-│   ├── profile.html
-│   └── js/
-
-│       ├── antro.js
-│       ├── create.js
-│       └── profilescript.js
-
-├── back-end/
-
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── uploads/
-│   └── server.js
-
 Developed by Nicole Stott as part of the final graduation thesis for Creative Computing.
 Design decisions backed by UX research, VR immersion literature, and behavioural science insights.
