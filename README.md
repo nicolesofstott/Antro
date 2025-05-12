@@ -34,11 +34,13 @@ MongoDB (local or cloud)
 
 ### Clone the repo
 git clone https://github.com/nicolesofstott/Antro
+
 cd antro
 ### Install dependencies
 npm install
 ### Create a .env file in the back-end directory with:
 MONGO_URI=your_mongo_connection_string
+
 JWT_SECRET=your_secret_key
 ### Start the backend
 cd back-end
