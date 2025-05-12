@@ -47,15 +47,20 @@ node server.js
 
 ## Folder Structure 
 antro/
+
 ├── front-end/
+
 │   ├── index.html
 │   ├── create.html
 │   ├── profile.html
 │   └── js/
+
 │       ├── antro.js
 │       ├── create.js
 │       └── profilescript.js
+
 ├── back-end/
+
 │   ├── controllers/
 │   ├── models/
 │   ├── routes/
