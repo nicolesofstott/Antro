@@ -33,7 +33,7 @@ MongoDB (local or cloud)
 ## Installation
 
 ### Clone the repo
-git clone https://github.com/yourusername/antro.git
+git clone https://github.com/nicolesofstott/Antro
 cd antro
 ### Install dependencies
 npm install
