@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Home</title>
+  <link rel="stylesheet" href="styles/antrostyle.css" />
+  <link rel="stylesheet" href="styles/styles.css" />
+  <link rel="stylesheet" href="styles/search-styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <nav class="main-nav">
+        <ul class="nav-left">
+          <li><a href="" class="inactive">Home</a></li>
+          <li><a href="../profile/profile.html">Profile</a></li>
+          <li><a href="../opportunities/oppindex.html">Opportunities</a></li>
+          <li><a href="../VR gallery/VRgallery.html">VR Gallery</a></li>
+        </ul>
+      
+        <div class="nav-logo">
+          <img src="../images/antro_logo1.png" alt="Antro Logo" />
+          <p>Interconnecting the world of art.</p>
+        </div>
+      
+        <ul class="nav-right">
+          <li><a href="../about us/about_us.html">About Us</a></li>
+          <li><a href="../contact us/contactus.html">Contact Us</a></li>
+          <li><a href="../settings/settings.html">Settings</a></li>
+        </ul>
+    </nav>
+      
+    <main>
+      <h1>Welcome to Antro</h1>
+      <p>This is the homepage. Use the navigation bar to explore other sections.</p>
+    
+      <div class="search-section">
+        <input type="text" id="searchBox" placeholder="Search for artists or artworks..." />
+        <div class="search-loading"><div class="spinner"></div></div>
+        <button class="search-clear-btn">&times;</button>
+        <div id="searchResults" class="search-results"></div>
+      </div>
+    </main>
+
+    <div class="section-box">
+      <h2>Featured Artists</h2>
+      <div class="artist-grid">
+      </div>
+    </div>
+
+    <!-- Artwork Modal Structure -->
+    <div id="artwork-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-loading">
+          <div class="spinner"></div>
+        </div>
+        <div class="artwork-details">
+        </div>
+      </div>
+    </div>
+
+    <script src="../scripts/antro.js"></script>
+</body>
+</html>

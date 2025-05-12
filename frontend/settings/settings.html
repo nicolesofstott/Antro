@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Settings</title>
+  <link rel="stylesheet" href="../styles/settingsstyles.css" />
+  <link rel="stylesheet" href="../styles/styles.css" />
+</head>
+<body>
+  <nav class="main-nav">
+    <ul class="nav-left">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../profile/profile.html">Profile</a></li>
+      <li><a href="../opportunities/oppindex.html">Opportunities</a></li>
+      <li><a href="../VRgallery/VRgallery.html">VR Gallery</a></li>
+    </ul>
+
+    <div class="nav-logo">
+      <img src="../images/antro_logo1.png" alt="Antro Logo" />
+      <p>Interconnecting the world of art.</p>
+    </div> 
+
+    <ul class="nav-right">
+      <li><a href="../about us/about_us.html">About Us</a></li>
+      <li><a href="../contact us/contactus.html">Contact Us</a></li>
+      <li><a href="" class="inactive">Settings</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h1>Account Settings</h1>
+    
+    <!-- Profile Picture Section -->
+    <div class="profile-picture-section">
+      <h3>Profile Picture</h3>
+      <div class="profile-pic-container">
+        <img id="profile-pic-preview" src="../images/profileholder.png" alt="Profile Picture" />
+        <div class="profile-pic-actions">
+          <input type="file" id="profile-pic-input" accept="image/*" />
+          <button id="upload-profile-pic-btn">Upload New Picture</button>
+          <button id="remove-profile-pic-btn">Remove Picture</button>
+        </div>
+      </div>
+    </div>
+    
+    <form id="settings-form">
+      <h3>Personal Information</h3>
+      <label for="name-input">Display Name:</label><br />
+      <input type="text" id="name-input" placeholder="Enter display name" /><br /><br />
+      
+      <label for="fullname-input">Full Name:</label><br />
+      <input type="text" id="fullname-input" placeholder="Enter your full name" /><br /><br />
+
+      <label for="username-input">Username:</label><br />
+      <input type="text" id="username-input" placeholder="Enter new username" /><br /><br />
+
+      <label for="about-input">Bio:</label><br />
+      <textarea id="about-input" rows="4" placeholder="Tell us about yourself..."></textarea><br /><br />
+
+      <label>Email:</label>
+      <p id="email-display" class="readonly-field"></p>
+      <p id="email-domain-notice" class="email-notice"></p><br />
+      
+      <h3>Change Password</h3>
+      <label for="current-password">Current Password:</label><br />
+      <input type="password" id="current-password" placeholder="Enter current password" /><br /><br />
+      
+      <label for="new-password">New Password:</label><br />
+      <input type="password" id="new-password" placeholder="Enter new password" /><br /><br />
+      
+      <button type="submit">Save Changes</button>
+      <button type="button" id="logout-btn" style="background-color: red; margin-top: 10px;">Log Out</button>
+    </form>
+
+    <!-- Delete Account Section -->
+    <div class="danger-zone">
+      <h3>Danger Zone</h3>
+      <p>This action cannot be undone. It will permanently delete your account and all associated data.</p>
+      <button id="delete-account-btn" type="button">Delete Account</button>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div id="delete-account-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h3>Delete Account</h3>
+        <p>Are you sure you want to delete your account? This action cannot be undone and will permanently delete:</p>
+        <ul>
+          <li>Your profile information</li>
+          <li>All your uploaded artworks</li>
+          <li>Your CV and portfolio files</li>
+        </ul>
+        <p>Please enter your password to confirm:</p>
+        <input type="password" id="delete-account-password" placeholder="Enter your password" />
+        <div class="modal-buttons">
+          <button id="cancel-delete-btn" type="button">Cancel</button>
+          <button id="confirm-delete-btn" type="button">Delete My Account</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/settingsscript.js"></script>
+</body>
+</html>

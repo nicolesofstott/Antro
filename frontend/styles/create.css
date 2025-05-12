@@ -1,0 +1,23 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #ECECEC;
+    font-family: Arial, sans-serif;
+  }
+  
+  .description-label {
+    font-size: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 4px 6px;
+    border-radius: 4px;
+    max-width: 150px;
+    cursor: pointer;
+    color: black;
+    line-height: 1.4;
+    user-select: none;
+  }
+  
+  .description-label:hover {
+    font-weight: bold;
+  }
+  

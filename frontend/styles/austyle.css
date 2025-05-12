@@ -1,0 +1,25 @@
+.about-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 40px 20px;
+  }
+  
+  .about-columns {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+  
+  .about-columns div {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .about-columns img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  

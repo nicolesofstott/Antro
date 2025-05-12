@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../styles/profilestyles.css" />
+  <link rel="stylesheet" href="../styles/styles.css" />
+</head>
+<body>
+  <nav class="main-nav">
+    <ul class="nav-left">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="" class="inactive">Profile</a></li>
+      <li><a href="../opportunities/oppindex.html">Opportunities</a></li>
+      <li><a href="../VRgallery/VRgallery.html">VR Gallery</a></li>
+    </ul>
+
+    <div class="nav-logo">
+      <img src="../images/antro_logo1.png" alt="Antro Logo" />
+      <p>Interconnecting the world of art.</p>
+    </div>
+
+    <ul class="nav-right">
+      <li><a href="../about us/about_us.html">About Us</a></li>
+      <li><a href="../contact us/contactus.html">Contact Us</a></li>
+      <li><a href="../settings/settings.html">Settings</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h2>Your Profile</h2>
+
+    <div class="profile-section">
+      <div class="profile-container">
+        <img id="profile-pic" src="../images/profileholder.png" alt="Profile Picture" class="profile-image" />
+        <div class="edit-profile-hint">
+          <a href="../settings/settings.html" class="edit-profile-link">Edit profile in Settings</a>
+        </div>
+      </div>
+
+      <div class="profile-info">
+        <h3 id="display-name">Your Name</h3>
+        <p id="display-about">Short bio...</p>
+      </div>
+    </div>
+
+    <div class="profile-tabs">
+      <div class="tab-buttons">
+        <button class="tab-button active" data-tab="artwork-tab">Artwork</button>
+        <button class="tab-button" data-tab="cv-tab">CV</button>
+        <button class="tab-button" data-tab="portfolio-tab">Portfolio</button>
+      </div>
+
+      <div class="tab-content" id="artwork-tab">
+        <h3>Your Artworks</h3>
+      
+        <button id="toggle-art-form" class="upload-toggle">+ Add New Artwork</button>
+      
+        <div id="art-upload-form" class="upload-form hidden">
+          <form id="artwork-upload-form">
+            <label>Main Image:</label>
+            <input type="file" name="mainImage" required accept="image/*" /><br />
+      
+            <label>Extra Images (optional):</label>
+            <input type="file" name="extraImages" multiple accept="image/*" /><br />
+      
+            <label>Title (optional):</label>
+            <input type="text" name="title" /><br />
+      
+            <label>Dimensions (required - format: ###x###):</label>
+            <input type="text" name="dimensions" required pattern="^\d{1,3}x\d{1,3}$" /><br />
+      
+            <label>Description (optional):</label>
+            <textarea name="description" rows="3"></textarea><br />
+      
+            <button type="submit">Upload Artwork</button>
+          </form>
+        </div>
+      
+        <div id="art-preview" class="art-grid"></div>
+      </div>      
+
+      <div class="tab-content" id="cv-tab">
+        <h3>Upload CV (PDF)</h3>
+        <input type="file" id="resume-upload" accept="application/pdf" />
+        <div id="resume-preview" class="pdf-preview"></div>
+      </div>
+
+      <div class="tab-content" id="portfolio-tab">
+        <h3>Upload Portfolio (PDF)</h3>
+        <input type="file" id="portfolio-upload" accept="application/pdf" />
+        <div id="portfolio-preview" class="pdf-preview"></div>
+      </div>
+    </div>
+    
+  </main>
+
+  <script src="../scripts/profilescript.js"></script>
+  <script src="../scripts/integrationScript.js"></script>
+
+  <div id="artworkModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" id="closeModalBtn">&times;</span>
+      <h3 id="modalTitle"></h3>
+      <p id="modalDimensions"></p>
+      <p id="modalDescription"></p>
+      <div id="modalImages" class="modal-images"></div>
+    </div>
+  </div>
+  
+</body>
+</html>
