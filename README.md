@@ -18,13 +18,18 @@ Antro is an interactive multi-user web platform that allows verified artists to 
 ## Tech Stack
 
 Frontend: HTML, CSS, JavaScript
+
 Backend: Node.js, Express.js
+
 Database: MongoDB + Mongoose
+
 VR Rendering: A-Frame, Three.js
+
 File Uploads: Multer
+
 Authentication: JWT
+
 Deployment-ready: Modular file and folder structure for long-term scalability
-Getting Started
 
 ## Prerequisites
 Node.js + npm
