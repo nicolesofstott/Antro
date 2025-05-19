@@ -1,33 +1,548 @@
-.tab-bar {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-    gap: 20px;
-  }
-  
-  .tab-bar button {
-    background: none;
-    border: none;
-    font-weight: bold;
-    font-size: 18px;
-    cursor: pointer;
-  }
-  
-  .tab-bar .active {
-    border-bottom: 2px solid black;
-  }
-  
-  .opportunity-list {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-  }
-  
-  .opportunity {
-    border-top: 1px solid #ccc;
-    padding: 15px 0;
-    display: flex;
-    justify-content: space-between;
+.opportunity-tabs {
+  display: flex;
+  margin-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--spacing-xs);
+}
+
+.opportunity-tab {
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  color: var(--text-primary);
+  margin-right: var(--spacing-md);
+}
+
+.opportunity-tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  transform: scaleX(0);
+  transition: transform var(--transition-fast);
+}
+
+.opportunity-tab:hover::after {
+  transform: scaleX(1);
+}
+
+.opportunity-tab.active::after {
+  transform: scaleX(1);
+}
+
+/* Opportunity tab */
+.opportunity-tab[data-tab="exhibitions"]::after {
+  background-color: var(--accent-1); /* Orange */
+}
+
+.opportunity-tab[data-tab="calls"]::after {
+  background-color: var(--accent-4); /* Plum */
+}
+
+.opportunity-tab[data-tab="residencies"]::after {
+  background-color: var(--accent-3); /* Light blue */
+}
+
+.opportunity-tab[data-tab="grants"]::after {
+  background-color: var(--accent-2); /* Pink */
+}
+
+.opportunity-tab[data-tab="jobs"]::after {
+  background-color: var(--accent-5); /* Dark blue */
+}
+
+.opportunity-tab[data-tab="workshops"]::after {
+  background-color: var(--secondary); /* Green */
+}
+
+/* Active tab */
+.opportunity-tab.active {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.opportunity-tab[data-tab="exhibitions"].active {
+  color: var(--accent-1);
+}
+
+.opportunity-tab[data-tab="calls"].active {
+  color: var(--accent-4);
+}
+
+.opportunity-tab[data-tab="residencies"].active {
+  color: var(--accent-3);
+}
+
+.opportunity-tab[data-tab="grants"].active {
+  color: var(--accent-2);
+}
+
+.opportunity-tab[data-tab="jobs"].active {
+  color: var(--accent-5);
+}
+
+.opportunity-tab[data-tab="workshops"].active {
+  color: var(--secondary);
+}
+
+
+.saved-filter {
+  margin-left: auto;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.saved-filter-icon {
+  margin-right: var(--spacing-xs);
+}
+
+.saved-filter.active {
+  color: gold;
+}
+
+/* Opportunity content */
+.opportunity-content {
+  display: none;
+}
+
+.opportunity-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.opportunity-list {
+  margin-top: var(--spacing-md);
+}
+
+.opportunity-item {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  background-color: var(--surface);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  justify-content: space-between;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.opportunity-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+.opportunity-details {
+  flex-grow: 1;
+  padding-left: var(--spacing-md);
+}
+
+/* Color-coded left border for each opportunity type */
+.opportunity-item[data-type="exhibition"] {
+  border-left: 4px solid var(--accent-1); 
+}
+
+.opportunity-item[data-type="call"] {
+  border-left: 4px solid var(--accent-4); 
+}
+
+.opportunity-item[data-type="residency"] {
+  border-left: 4px solid var(--accent-3); 
+}
+
+.opportunity-item[data-type="grant"] {
+  border-left: 4px solid var(--accent-2);
+}
+
+.opportunity-item[data-type="job"] {
+  border-left: 4px solid var(--accent-5); 
+}
+
+.opportunity-item[data-type="workshop"] {
+  border-left: 4px solid var(--secondary); 
+}
+
+/* Badge styling */
+.opportunity-type {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom-left-radius: var(--border-radius-sm);
+}
+
+.opportunity-type[data-type="exhibition"] {
+  background-color: var(--accent-1);
+  color: var(--text-on-orange);
+}
+
+.opportunity-type[data-type="call"] {
+  background-color: var(--accent-4);
+  color: var(--text-on-plum);
+}
+
+.opportunity-type[data-type="residency"] {
+  background-color: var(--accent-3);
+  color: var(--text-on-light-blue);
+}
+
+.opportunity-type[data-type="grant"] {
+  background-color: var(--accent-2);
+  color: var(--text-on-pink);
+}
+
+.opportunity-type[data-type="job"] {
+  background-color: var(--accent-5);
+  color: var(--text-on-dark-blue);
+}
+
+.opportunity-type[data-type="workshop"] {
+  background-color: var(--secondary);
+  color: var(--text-light);
+}
+
+/* Opportunity title with color accents */
+.opportunity-title {
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  font-size: 1.1rem;
+}
+
+.opportunity-item[data-type="exhibition"] .opportunity-title {
+  color: var(--accent-1);
+}
+
+.opportunity-item[data-type="call"] .opportunity-title {
+  color: var(--accent-4);
+}
+
+.opportunity-item[data-type="residency"] .opportunity-title {
+  color: var(--accent-3);
+}
+
+.opportunity-item[data-type="grant"] .opportunity-title {
+  color: var(--accent-2);
+}
+
+.opportunity-item[data-type="job"] .opportunity-title {
+  color: var(--accent-5);
+}
+
+.opportunity-item[data-type="workshop"] .opportunity-title {
+  color: var(--secondary);
+}
+
+/* Opportunity metadata */
+.opportunity-meta {
+  display: flex;
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.9rem;
+}
+
+.opportunity-location {
+  display: flex;
+  align-items: center;
+  margin-right: var(--spacing-md);
+}
+
+.opportunity-date {
+  display: flex;
+  align-items: center;
+}
+
+.meta-icon {
+  margin-right: var(--spacing-xs);
+  color: var(--text-muted);
+}
+
+.opportunity-description {
+  color: var(--text-body);
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.5;
+}
+
+/* Price and actions */
+.opportunity-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  min-width: 120px;
+  padding-left: var(--spacing-md);
+}
+
+.opportunity-price {
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.opportunity-item[data-type="exhibition"] .opportunity-price {
+  color: var(--accent-1);
+}
+
+.opportunity-item[data-type="call"] .opportunity-price {
+  color: var(--accent-4);
+}
+
+.opportunity-item[data-type="residency"] .opportunity-price {
+  color: var(--accent-3);
+}
+
+.opportunity-item[data-type="grant"] .opportunity-price {
+  color: var(--accent-2);
+}
+
+.opportunity-item[data-type="job"] .opportunity-price {
+  color: var(--accent-5);
+}
+
+.opportunity-item[data-type="workshop"] .opportunity-price {
+  color: var(--secondary);
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.contact-btn, .save-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  display: flex;
+  align-items: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon {
+  margin-right: var(--spacing-xs);
+}
+
+/* Opportunity type */
+.opportunity-item[data-type="exhibition"] .contact-btn {
+  background-color: var(--accent-1);
+  color: var(--text-on-orange);
+}
+
+.opportunity-item[data-type="call"] .contact-btn {
+  background-color: var(--accent-4);
+  color: var(--text-on-plum);
+}
+
+.opportunity-item[data-type="residency"] .contact-btn {
+  background-color: var(--accent-3);
+  color: var(--text-on-light-blue);
+}
+
+.opportunity-item[data-type="grant"] .contact-btn {
+  background-color: var(--accent-2);
+  color: var(--text-on-pink);
+}
+
+.opportunity-item[data-type="job"] .contact-btn {
+  background-color: var(--accent-5);
+  color: var(--text-on-dark-blue);
+}
+
+.opportunity-item[data-type="workshop"] .contact-btn {
+  background-color: var(--secondary);
+  color: var(--text-light);
+}
+
+/* Save button styling */
+.save-btn {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.save-btn:hover,
+.save-btn.saved {
+  background-color: #FFF9E6;
+  border-color: gold;
+  color: goldenrod;
+}
+
+/* Deadline indicator */
+.deadline-indicator {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.deadline-urgent {
+  color: var(--error);
+  font-weight: 600;
+}
+
+.deadline-approaching {
+  color: var(--accent-1);
+}
+
+.deadline-distant {
+  color: var(--secondary);
+}
+
+/* Empty state */
+.empty-state {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--text-muted);
+  background-color: var(--surface-alt);
+  border-radius: var(--border-radius-md);
+  margin-top: var(--spacing-md);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.empty-state-message {
+  margin-bottom: var(--spacing-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.empty-state-description {
+  max-width: 500px;
+  margin: 0 auto var(--spacing-md);
+}
+
+/* Add opportunity section */
+.add-opportunity-section {
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.add-opportunity-section h2 {
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+/* Individual opportunity page tabs */
+.opportunity-detail-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--spacing-md);
+}
+
+.opportunity-detail-tab {
+  padding: var(--spacing-sm) var(--spacing-md);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 3px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.opportunity-detail-tab:hover {
+  color: var(--text-primary);
+}
+
+.opportunity-detail-tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--primary);
+}
+
+/* Color-coded tabs for different opportunity types */
+.opportunity-detail[data-type="exhibition"] .opportunity-detail-tab.active {
+  border-bottom-color: var(--accent-1);
+  color: var(--accent-1);
+}
+
+.opportunity-detail[data-type="call"] .opportunity-detail-tab.active {
+  border-bottom-color: var(--accent-4);
+  color: var(--accent-4);
+}
+
+.opportunity-detail[data-type="residency"] .opportunity-detail-tab.active {
+  border-bottom-color: var(--accent-3);
+  color: var(--accent-3);
+}
+
+.opportunity-detail[data-type="grant"] .opportunity-detail-tab.active {
+  border-bottom-color: var(--accent-2);
+  color: var(--accent-2);
+}
+
+.opportunity-detail[data-type="job"] .opportunity-detail-tab.active {
+  border-bottom-color: var(--accent-5);
+  color: var(--accent-5);
+}
+
+.opportunity-detail[data-type="workshop"] .opportunity-detail-tab.active {
+  border-bottom-color: var(--secondary);
+  color: var(--secondary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .opportunity-tabs {
     flex-wrap: wrap;
   }
   
+  .opportunity-tab {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .saved-filter {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-xs) 0;
+    border-top: 1px solid var(--border);
+  }
+  
+  .opportunity-item {
+    flex-direction: column;
+  }
+  
+  .opportunity-details {
+    padding-left: 0;
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .opportunity-actions {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 0;
+  }
+  
+  .opportunity-price {
+    margin-bottom: 0;
+  }
+}

@@ -161,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Fallback to API if direct paths fail
   async function tryApiApproach(userId) {
     try {
       const response = await fetch(`${backendBase}/api/files/user/${userId}`);

@@ -4,11 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Antro | VR Gallery</title>
+
+  <!-- Global and page-specific CSS -->
   <link rel="stylesheet" href="../styles/styles.css" />
-  <link rel="stylesheet" href="../styles/VRgallery.css" />
+  <link rel="stylesheet" href="../styles/gallerylist.css" />
+
+  <!-- A-Frame library (for VR scene) -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  
+  <!-- Gallery System Scripts -->
+  <script src="../scripts/gallery-data.js"></script>
 </head>
 <body>
+  <!-- Navigation Bar -->
   <nav class="main-nav">
     <ul class="nav-left">
       <li><a href="../index.html">Home</a></li>
@@ -29,19 +37,72 @@
     </ul>
   </nav>
 
+  <!-- Main Section -->
   <div class="section-box">
     <h2>Explore Our VR Gallery</h2>
     <p>Step into a virtual world showcasing emerging artists. Use your mouse or VR headset to explore.</p>
 
+    <!-- Tabs -->
     <div class="tabs-container" id="galleryTabs">
       <button class="tab-button" data-tab="explore">EXPLORE</button>
       <button class="tab-button active" data-tab="my-galleries">MY GALLERIES</button>
       <button class="tab-button" data-tab="saved">SAVED</button>
     </div>
 
-    <!-- MY GALLERIES -->
+    <!-- My Galleries -->
     <div class="tab-content active" id="my-galleries">
-      <div class="gallery-grid"></div>
+      <div class="gallery-grid">
+        <div class="create-gallery-card" id="openCreateModal">
+          <span style="font-size: 3rem; color: var(--text-medium);">+</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal for Create Gallery -->
+    <div class="gallery-modal hidden" id="createGalleryModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Create New Gallery</h3>
+          <span class="close-button" id="closeCreateModal">&times;</span>
+        </div>
+    
+        <div class="form-group">
+          <label for="galleryName">Gallery Name:</label>
+          <input type="text" id="galleryName" placeholder="e.g. DreamSpace" />
+        </div>
+    
+        <div class="form-group">
+          <label for="roomSize">Room Size:</label>
+          <select id="roomSize">
+            <option value="small">Small (3x3m)</option>
+            <option value="medium" selected>Medium (5x5m)</option>
+            <option value="large">Large (7x7m)</option>
+          </select>
+        </div>
+    
+        <div class="form-group">
+          <label for="frameStyle">Frame Style:</label>
+          <select id="frameStyle">
+            <option value="gold">Gold</option>
+            <option value="black">Black</option>
+            <option value="white">White</option>
+            <option value="natural">Natural Wood</option>
+          </select>
+        </div>
+    
+        <h3>Select Your Artworks</h3>
+        <p class="help-text">Choose artworks from your profile to display in the gallery</p>
+    
+        <div class="search-box">
+          <input type="text" id="artworkSearch" placeholder="Search by title or artist..." />
+        </div>
+    
+        <div id="artworkSelection" class="artwork-grid">
+          <div class="loading">Loading your artworks...</div>
+        </div>
+    
+        <button id="createBtn" class="create-button">Create Gallery</button>
+      </div>
     </div>
 
     <!-- EXPLORE TAB -->
@@ -59,60 +120,10 @@
     <div class="tab-content" id="saved">
       <div class="gallery-grid"></div>
     </div>
+  </div>
 
-    <!-- CREATE GALLERY MODAL -->
-    <div class="modal" id="createGalleryModal">
-      <div class="modal-content">
-        <span class="close-btn" id="closeModal">&times;</span>
-        <h2>Create New Gallery</h2>
-
-        <div class="form-group">
-          <label for="galleryName">Gallery Name:</label>
-          <input type="text" id="galleryName" placeholder="e.g. DreamSpace" />
-        </div>
-
-        <div class="form-group">
-          <label for="roomSize">Room Size:</label>
-          <select id="roomSize">
-            <option value="small">Small (3x3m)</option>
-            <option value="medium" selected>Medium (5x5m)</option>
-            <option value="large">Large (7x7m)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="frameStyle">Frame Style:</label>
-          <select id="frameStyle">
-            <option value="gold">Gold</option>
-            <option value="black">Black</option>
-            <option value="white">White</option>
-            <option value="natural">Natural Wood</option>
-          </select>
-        </div>
-
-        <h3>Select Your Artworks</h3>
-        <p class="help-text">Choose artworks from your profile to display in the gallery</p>
-        
-        <div class="search-box">
-          <input 
-            type="text" 
-            id="artworkSearch" 
-            placeholder="Search by title..." 
-          />
-        </div>
-        
-        <div id="artworkSelection" class="artwork-grid">
-          <div class="loading">Loading your artworks...</div>
-        </div>
-        
-        <div class="button-group">
-          <button id="createBtn">Create Gallery</button>
-        </div>
-      </div>
-    </div>
-
+  <script src="../scripts/gallery-data.js"></script>
+  <script src="../scripts/gallery-config.js"></script>
   <script src="../scripts/VRgallery.js"></script>
-  <script src="../scripts/integrationScript.js"></script>
-
 </body>
 </html>

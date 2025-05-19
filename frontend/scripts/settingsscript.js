@@ -168,7 +168,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     reader.readAsDataURL(file);
 
-    // Upload to server
     try {
       const formData = new FormData();
       formData.append("profilePic", file);

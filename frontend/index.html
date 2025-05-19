@@ -2,50 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Home</title>
-  <link rel="stylesheet" href="styles/antrostyle.css" />
+  <title>Antro | Interconnecting the world of art</title>
   <link rel="stylesheet" href="styles/styles.css" />
+  <link rel="stylesheet" href="styles/antrostyle.css" />
   <link rel="stylesheet" href="styles/search-styles.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <nav class="main-nav">
-        <ul class="nav-left">
-          <li><a href="" class="inactive">Home</a></li>
-          <li><a href="../profile/profile.html">Profile</a></li>
-          <li><a href="../opportunities/oppindex.html">Opportunities</a></li>
-          <li><a href="../VR gallery/VRgallery.html">VR Gallery</a></li>
-        </ul>
-      
-        <div class="nav-logo">
-          <img src="../images/antro_logo1.png" alt="Antro Logo" />
-          <p>Interconnecting the world of art.</p>
-        </div>
-      
-        <ul class="nav-right">
-          <li><a href="../about us/about_us.html">About Us</a></li>
-          <li><a href="../contact us/contactus.html">Contact Us</a></li>
-          <li><a href="../settings/settings.html">Settings</a></li>
-        </ul>
-    </nav>
+  <nav class="main-nav">
+    <ul class="nav-left">
+      <li><a href="" class="inactive">Home</a></li>
+      <li><a href="profile/profile.html">Profile</a></li>
+      <li><a href="opportunities/oppindex.html">Opportunities</a></li>
+      <li><a href="VRgallery/VRgallery.html">VR Gallery</a></li>
+    </ul>
+  
+    <div class="nav-logo">
+      <img src="images/antro_logo1.png" alt="Antro Logo" />
+      <p>Interconnecting the world of art.</p>
+    </div>
+  
+    <ul class="nav-right">
+      <li><a href="about us/about_us.html">About Us</a></li>
+      <li><a href="contact us/contactus.html">Contact Us</a></li>
+      <li><a href="settings/settings.html">Settings</a></li>
+    </ul>
+  </nav>  
+  
       
     <main>
-      <h1>Welcome to Antro</h1>
-      <p>This is the homepage. Use the navigation bar to explore other sections.</p>
-    
-      <div class="search-section">
-        <input type="text" id="searchBox" placeholder="Search for artists or artworks..." />
-        <div class="search-loading"><div class="spinner"></div></div>
-        <button class="search-clear-btn">&times;</button>
-        <div id="searchResults" class="search-results"></div>
-      </div>
-    </main>
+      <section class="hero-section">
+        <h1>Welcome to Antro</h1>
+        <p class="hero-subtitle">Discover, create, and connect in the world of digital art</p>
+      
+        <div class="search-container">
+          <div class="search-section">
+            <input type="text" id="searchBox" placeholder="Search for artists or artworks..." />
+            <div class="search-loading"><div class="spinner"></div></div>
+            <button class="search-clear-btn">&times;</button>
+            <div id="searchResults" class="search-results"></div>
+          </div>
+        </div>
+      </section>
 
-    <div class="section-box">
-      <h2>Featured Artists</h2>
-      <div class="artist-grid">
-      </div>
-    </div>
+      <section class="featured-section">
+        <div class="section-box">
+          <h2>Featured Artists</h2>
+          <div class="artist-grid" id="featured-artists">
+            <!-- Artist cards will be dynamically populated here -->
+          </div>
+        </div>
+      </section>
+
+      <section class="platform-features">
+        <h2>Explore Antro</h2>
+        <div class="features-grid">
+          <div class="feature-card accent-orange">
+            <h3>Showcase Your Work</h3>
+            <p>Upload your artwork and share it with the world in stunning detail.</p>
+          </div>
+          <div class="feature-card accent-blue">
+            <h3>Immersive VR Gallery</h3>
+            <p>Experience art in a new dimension with our browser-based VR gallery.</p>
+          </div>
+          <div class="feature-card accent-pink">
+            <h3>Connect with Artists</h3>
+            <p>Discover new artists and build your creative network.</p>
+          </div>
+        </div>
+      </section>
+    </main>
 
     <!-- Artwork Modal Structure -->
     <div id="artwork-modal" class="modal">
@@ -59,6 +85,35 @@
       </div>
     </div>
 
-    <script src="../scripts/antro.js"></script>
+    <footer class="main-footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <div class="footer-logo-container">
+            <img src="images/antro_logo1.png" alt="Antro Logo" height="40">
+          </div>
+          <p>© 2025 Antro. All rights reserved.</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Platform</h4>
+            <ul>
+              <li><a href="#">Home</a></li>
+              <li><a href="profile/profile.html">Profile</a></li>
+              <li><a href="VRgallery/VRgallery.html">VR Gallery</a></li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h4>Resources</h4>
+            <ul>
+              <li><a href="about us/about_us.html">About Us</a></li>
+              <li><a href="contact us/contactus.html">Contact</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="scripts/antro.js"></script>
 </body>
 </html>

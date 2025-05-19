@@ -27,14 +27,48 @@
         </ul>
     </nav>
 
-  <main>
-    <h1>Explore Opportunities</h1>
-    <ul>
-      <li>Virtual Art Fair — May 2025</li>
-      <li>Join the Creator Network</li>
-      <li>Internship openings</li>
-    </ul>
-  </main>
+    <main class="opportunities-page">
+      <section class="add-opportunity-section section-container">
+        <h2>Add New Opportunity</h2>
+        <form id="addOpportunityForm">
+          <label for="title">Title</label>
+          <input type="text" id="title" required>
+      
+          <label for="type">Type</label>
+          <select id="type" required>
+            <option value="job">Job</option>
+            <option value="internship">Internship</option>
+            <option value="residency">Residency</option>
+          </select>
+      
+          <label for="location">Location</label>
+          <input type="text" id="location" required>
+      
+          <label for="description">Description</label>
+          <textarea id="description" rows="3" required></textarea>
+      
+          <label for="price">Price / Compensation</label>
+          <input type="text" id="price">
+      
+          <button type="submit" class="button">Submit Opportunity</button>
+        </form>
+      </section>
+      
+      <h1>Explore Opportunities</h1>
+    
+      <div class="opportunity-tabs">
+        <div class="opportunity-tab active" data-type="all">All</div>
+        <div class="opportunity-tab" data-type="job">Jobs</div>
+        <div class="opportunity-tab" data-type="internship">Internships</div>
+        <div class="opportunity-tab" data-type="residency">Residencies</div>
+      </div>
+    
+      <div class="opportunity-list" id="opportunityList">
+      </div>
+    
+      <div class="empty-state hidden" id="emptyState">No opportunities available.</div>
+    </main>
+    
 
   <script src="oppscript.js"></script>
 </body>

@@ -1,387 +1,402 @@
-const searchBox = document.getElementById('searchBox');
-const searchResults = document.getElementById('searchResults');
-const searchClearBtn = document.querySelector('.search-clear-btn');
-const searchLoading = document.querySelector('.search-loading');
-const artworkModal = document.getElementById('artwork-modal');
-const modalLoading = document.querySelector('.modal-loading');
-const artworkDetails = document.querySelector('.artwork-details');
-const closeModalBtn = document.querySelector('.close-modal');
-
-let timeout = null;
-let lastQuery = '';
-let cachedResults = {};
-
-const API_BASE_URL = 'http://localhost:5050'; 
-
-document.addEventListener('DOMContentLoaded', () => {
-  initializeModalListeners();
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("Gallery loader script initialized");
+  
+  // Check URL parameters for gallery info
+  const urlParams = new URLSearchParams(window.location.search);
+  const galleryName = urlParams.get('gallery');
+  const frameStyle = urlParams.get('frameStyle') || 'gold';
+  
+  if (galleryName) {
+    console.log(`Loading gallery: ${galleryName} with ${frameStyle} frames`);
+    setTimeout(() => loadGallery(galleryName, frameStyle), 2000);
+  }
+  
+  setTimeout(setupBackButton, 1000);
+  setTimeout(cleanupUnwantedElements, 2000);
 });
 
-// Search input event listener
-searchBox.addEventListener('input', () => {
-  clearTimeout(timeout);
+async function loadGallery(galleryName, frameStyle) {
+  console.log(`Loading gallery: ${galleryName} with ${frameStyle} frames`);
   
-  const query = searchBox.value.trim();
-  
-  // Show/hide clear button
-  searchClearBtn.style.display = query.length > 0 ? 'block' : 'none';
-  
-  // Close results if empty
-  if (query.length === 0) {
-    searchResults.innerHTML = '';
-    searchResults.style.display = 'none';
-    searchLoading.style.display = 'none';
-    return;
-  }
-  
-  // Show loading indicator for searches
-  if (query.length >= 2) {
-    searchLoading.style.display = 'block';
-  }
+  // Hide all placeholders initially
+  const allPlaceholders = document.querySelectorAll('a-image');
+  allPlaceholders.forEach(placeholder => {
+    placeholder.setAttribute('visible', 'false');
+  });
 
-  if (cachedResults[query]) {
-    displayResults(cachedResults[query]);
-    searchLoading.style.display = 'none';
-    return;
-  }
-
-  timeout = setTimeout(() => {
-    performSearch(query);
-  }, 300); 
-});
-
-// Clear search function
-searchClearBtn.addEventListener('click', () => {
-  searchBox.value = '';
-  searchResults.innerHTML = '';
-  searchResults.style.display = 'none';
-  searchClearBtn.style.display = 'none';
-  searchBox.focus();
-});
-
-// Perform actual search
-async function performSearch(query) {
-  if (query.length < 2) {
-    searchLoading.style.display = 'none';
-    searchResults.innerHTML = '';
-    searchResults.style.display = 'none';
-    return;
-  }
-  
+  let gallery = null;
   
   try {
-    const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`);
-    
-    if (!response.ok) {
-      throw new Error(`Server responded with status: ${response.status}`);
+    if (typeof GalleryData !== 'undefined' && GalleryData.getGallery) {
+      try {
+        gallery = await GalleryData.getGallery(galleryName);
+        console.log(`Gallery "${galleryName}" loaded from user database`);
+      } catch (error) {
+        console.warn(`Error getting gallery from user database: ${error.message}`);
+        throw error;
+      }
+    } else {
+      throw new Error("GalleryData module not available");
     }
-    
-    const data = await response.json();
-    console.log('Search results:', data); 
-
-    cachedResults[query] = data;
-    
-    // Display results
-    displayResults(data);
   } catch (error) {
-    console.error("Error fetching search results:", error);
-    searchResults.innerHTML = `
-      <div class="error-message">
-        <i class="error-icon">⚠️</i>
-        <p>Error connecting to search service</p>
-        <button class="retry-button">Retry</button>
-      </div>
-    `;
-    searchResults.style.display = 'block';
+    console.warn(`Falling back to localStorage: ${error.message}`);
     
-    document.querySelector('.retry-button')?.addEventListener('click', () => {
-      performSearch(query);
-    });
-  } finally {
-    searchLoading.style.display = 'none';
-  }
-}
-
-// Display search results
-function displayResults(data) {
-  // Handle empty results
-  if (data.profiles.length === 0 && data.artworks.length === 0 && data.galleries.length === 0) {
-    searchResults.innerHTML = '<div class="no-results">No matches found</div>';
-    searchResults.style.display = 'block';
-    return;
-  }
-
-  let html = '';
-  
-  // Add section headers
-  if (data.profiles.length > 0) {
-    html += '<div class="result-section-header">Artists</div>';
-    
-    // Sort profiles 
-    const artistProfiles = data.profiles.filter(profile => profile.isArtist);
-    const regularProfiles = data.profiles.filter(profile => !profile.isArtist);
-    
-    // First artist profiles
-    artistProfiles.forEach(profile => {
-      const displayName = profile.fullName || profile.username;
-      const profileId = profile._id;
-      
-      html += `
-        <div class="result-item artist-profile" data-type="profile" data-id="${profileId}">
-          <a href="/profile/${profileId}" class="profile-link">
-            <div class="result-icon">🎨</div>
-            <img src="${profile.profilePic ? `${API_BASE_URL}/uploads/${profileId}/profiles/${profile.profilePic}` : `${API_BASE_URL}/uploads/profiles/default-profile.png`}" 
-                alt="Profile" class="thumb"
-                onerror="this.src='${API_BASE_URL}/uploads/profiles/default-profile.png'">
-            <div class="result-details">
-              <div class="result-title">${displayName}</div>
-              <div class="result-subtitle">@${profile.username}</div>
-              <div class="result-badge artist-badge">Artist</div>
-            </div>
-          </a>
-        </div>
-      `;
-    });
-    
-    // Then regular profiles 
-    if (regularProfiles.length > 0) {
-      if (artistProfiles.length > 0) {
-        html += '<div class="result-section-header">Other Users</div>';
-      }
-      
-      regularProfiles.forEach(profile => {
-        const displayName = profile.fullName || profile.username;
-        const profileId = profile._id;
-        
-        html += `
-          <div class="result-item" data-type="profile" data-id="${profileId}">
-            <a href="/profile/${profileId}" class="profile-link">
-              <div class="result-icon">👤</div>
-              <img src="${profile.profilePic ? `${API_BASE_URL}/uploads/${profileId}/profiles/${profile.profilePic}` : `${API_BASE_URL}/uploads/profiles/default-profile.png`}" 
-                  alt="Profile" class="thumb"
-                  onerror="this.src='${API_BASE_URL}/uploads/profiles/default-profile.png'">
-              <div class="result-details">
-                <div class="result-title">${displayName}</div>
-                <div class="result-subtitle">@${profile.username}</div>
-              </div>
-            </a>
-          </div>
-        `;
-      });
-    }
-  }
-  
-  // Add VR galleries to search results
-  if (data.galleries && data.galleries.length > 0) {
-    html += '<div class="result-section-header">VR Galleries</div>';
-    
-    data.galleries.forEach(gallery => {
-      const galleryId = gallery._id;
-      const galleryName = gallery.name;
-      const artistName = gallery.user ? (gallery.user.displayName || gallery.user.username) : 'Unknown Artist';
-      
-      const previewUrl = gallery.previewImageUrl || `${API_BASE_URL}/uploads/profiles/default-profile.png`;
-      
-      html += `
-        <div class="result-item gallery-item" data-type="gallery" data-id="${galleryId}">
-          <div class="gallery-preview" data-id="${galleryId}">
-            <div class="result-icon">🖼️</div>
-            <img src="${previewUrl}" 
-                 alt="Gallery" class="thumb"
-                 onerror="this.src='${API_BASE_URL}/uploads/profiles/default-profile.png'">
-            <div class="result-details">
-              <div class="result-title">${galleryName}</div>
-              <div class="result-subtitle">by ${artistName}</div>
-              <div class="result-subtitle">${gallery.artworkCount || 0} artworks</div>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-  }
-  
-  if (data.artworks.length > 0) {
-    html += '<div class="result-section-header">Artworks</div>';
-  
-    data.artworks.forEach(artwork => {
-      if (!artwork.user || !artwork.user._id) {
-        console.error('Artwork missing user data:', artwork);
-        return; 
-      }
-      
-      // Artwork title
-      const title = artwork.title || 'Untitled';
-      const userId = artwork.user._id;
-      const artworkId = artwork._id;
-
-      // MainImage path 
-      let mainImageUrl;
-      if (artwork.mainImageUrl) {
-        mainImageUrl = artwork.mainImageUrl;
-      } else if (artwork.mainImage) {
-        if (artwork.mainImage.startsWith('http')) {
-          mainImageUrl = artwork.mainImage;
-        } else if (artwork.mainImage.includes('/')) {
-          mainImageUrl = `${API_BASE_URL}/${artwork.mainImage}`;
-        } else {
-          mainImageUrl = `${API_BASE_URL}/uploads/${userId}/artworks/${artwork.mainImage}`;
+    // Try localStorage as fallback
+    try {
+      const galleries = localStorage.getItem("userGalleries");
+      if (galleries) {
+        const parsedGalleries = JSON.parse(galleries);
+        gallery = parsedGalleries.find(g => g.name === galleryName);
+        if (gallery) {
+          console.log(`Gallery "${galleryName}" loaded from localStorage`);
         }
-      } else {
-        mainImageUrl = `${API_BASE_URL}/uploads/artworks/default-artwork.png`;
       }
-  
-      html += `
-        <div class="result-item artwork-item" data-type="artwork" data-userid="${userId}" data-artworkid="${artworkId}">
-          <div class="artwork-preview" data-id="${artworkId}">
-            <img src="${mainImageUrl}" 
-                 alt="Artwork" class="thumb"
-                 onerror="this.src='${API_BASE_URL}/uploads/artworks/default-artwork.png'">
-            <div class="result-details">
-              <div class="result-title">${title}</div>
-              <div class="result-subtitle">${artwork.user.username ? 'by ' + artwork.user.username : ''}</div>
-            </div>
-          </div>
-        </div>
-      `;
-    });
+    } catch (storageError) {
+      console.error(`LocalStorage error: ${storageError.message}`);
+    }
+    
+    // If still no gallery, create a mock one
+    if (!gallery) {
+      console.warn(`No gallery found for "${galleryName}", creating mock gallery`);
+      gallery = createMockGallery(galleryName, frameStyle);
+    }
   }
+  
+  if (!gallery) {
+    console.error(`Gallery not found: ${galleryName}`);
+    showGalleryError(`Gallery "${galleryName}" not found`);
+    return;
+  }
+  
+  console.log("Gallery data:", gallery);
+  
+  if (!gallery.artworks) {
+    gallery.artworks = [];
+  }
+  
+  // Mock artworks if none are present
+  if (gallery.artworks.length === 0) {
+    console.warn("Gallery has no artworks, adding mock artworks");
+    gallery.artworks = getMockArtworks(4);
+  }
+  
+  console.log("Artworks to load:", gallery.artworks);
+  
+  // Room size and frame style
+  const roomSize = gallery.size || 'medium';
 
-  searchResults.innerHTML = html;
-  searchResults.style.display = 'block';
-  
-  addResultEventListeners();
-}
-
-// Gallery clicks
-function addResultEventListeners() {
-  // Profile
-  document.querySelectorAll('.result-item[data-type="profile"]').forEach(item => {
-    item.addEventListener('click', (event) => {
-      if (event.target.tagName !== 'A' && !event.target.closest('a')) {
-        const id = item.getAttribute('data-id');
-        window.location.href = `/profile/${id}`;
-      }
-    });
-  });
-  
-  // Gallery
-  document.querySelectorAll('.gallery-preview').forEach(item => {
-    if (item.closest('.result-item[data-type="gallery"]')) {
-      item.addEventListener('click', (event) => {
-        const galleryId = item.getAttribute('data-id');
-        window.location.href = `../Create gallery/creategallery.html?id=${galleryId}`;
-        
-        event.preventDefault();
-        event.stopPropagation();
-      });
-    }
-  });
-  
-  // Artwork 
-  document.querySelectorAll('.artwork-preview').forEach(item => {
-    if (item.closest('.result-item[data-type="artwork"]')) {
-      item.addEventListener('click', (event) => {
-        const artworkId = item.getAttribute('data-id');
-        openArtworkModal(artworkId);
-        event.preventDefault();
-        event.stopPropagation();
-      });
-    }
-  });
-}
-
-// Artwork modal listeners
-function initializeModalListeners() {
-  closeModalBtn.addEventListener('click', () => {
-    artworkModal.style.display = 'none';
-  });
-  
-  artworkModal.addEventListener('click', (event) => {
-    if (event.target === artworkModal) {
-      artworkModal.style.display = 'none';
-    }
-  });
-  
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      artworkModal.style.display = 'none';
-    }
-  });
-}
-
-// Open the artwork modal and load artwork details
-async function openArtworkModal(artworkId) {
-  artworkDetails.innerHTML = '';
-  modalLoading.style.display = 'block';
-  artworkModal.style.display = 'block';
-  
   try {
-    const response = await fetch(`${API_BASE_URL}/api/artworks/${artworkId}`);
-    
-    if (!response.ok) {
-      throw new Error(`Server responded with status: ${response.status}`);
+    const scale = window.resizeRoom(roomSize);
+    console.log(`Room resized with scale factor ${scale}`);
+  } catch (error) {
+    console.error("Error resizing room:", error);
+  }
+  
+  // Position camera
+  try {
+    window.positionCamera(roomSize);
+  } catch (error) {
+    console.error("Error positioning camera:", error);
+  }
+  
+  // Calculate artwork positions
+  let wallPositions;
+  try {
+    if (window.calculateWallPositions) {
+      wallPositions = window.calculateWallPositions(gallery.artworks, roomSize);
+    } else {
+      wallPositions = window.calculateOptimalPositions(gallery.artworks, roomSize);
     }
-    
-    const artwork = await response.json();
-    
-    let content = `
-      <h2>${artwork.title || 'Untitled'}</h2>
-      <div class="artwork-image-container">
-        <img src="${artwork.mainImageUrl}" alt="${artwork.title || 'Artwork'}" class="artwork-main-image">
-      </div>
-      <div class="artwork-info">
-        <p class="artwork-artist">Artist: <a href="/profile/${artwork.user._id}">${artwork.user.username}</a></p>
-        <p class="artwork-dimensions">Dimensions: ${artwork.dimensions || 'Not specified'}</p>
-        <div class="artwork-description">
-          <h3>Description</h3>
-          <p>${artwork.description || 'No description available.'}</p>
-        </div>
-      </div>
-    `;
-    
-    if (artwork.extraImageUrls && artwork.extraImageUrls.length > 0) {
-      content += '<div class="artwork-extra-images"><h3>Additional Images</h3><div class="image-gallery">';
+    console.log("Wall positions calculated:", wallPositions);
+  } catch (error) {
+    console.error("Error calculating wall positions:", error);
+    showGalleryError("Error setting up gallery layout");
+    return;
+  }
+  
+  // Create a map to track used positions to prevent overlaps
+  const usedPositions = new Map();
+  
+  let artworkIndex = 0;
+  const placedArtworks = [];
+
+  try {
+    if (typeof window.assignArtworksToWalls === 'function') {
+      const assignments = window.assignArtworksToWalls(gallery.artworks, wallPositions, allPlaceholders);
       
-      artwork.extraImageUrls.forEach(url => {
-        content += `<img src="${url}" alt="Additional view" class="gallery-thumbnail">`;
+      // Display all artworks
+      assignments.forEach(assignment => {
+        window.displayArtwork(assignment, gallery.frameStyle || frameStyle);
+        placedArtworks.push(assignment.artwork);
       });
+    } else {
+
+      const initialPlacements = gallery.artworks.map((artwork, index) => ({
+        artwork,
+        placeholder: index < allPlaceholders.length ? allPlaceholders[index] : null,
+        originalIndex: index
+      }));
       
-      content += '</div></div>';
+      const validPlacements = initialPlacements.filter(p => p.placeholder);
+      
+      const redistributedPlacements = window.redistributeArtworksToWalls(validPlacements, wallPositions, allPlaceholders);
+      
+      redistributedPlacements.forEach((placement, index) => {
+        const { artwork, placeholder } = placement;
+        
+        if (!artwork || !artwork.url) {
+          console.warn(`Artwork is missing or has no URL`);
+          return;
+        }
+        
+        if (!placeholder) {
+          console.warn(`No placeholder available for artwork ${index + 1}`);
+          return;
+        }
+        
+        const position = placeholder.getAttribute('position');
+        if (!position) {
+          console.warn(`Placeholder has no position attribute`);
+          return;
+        }
+        
+        // Create a unique position key to check for overlaps
+        const positionKey = `${position.x.toFixed(2)},${position.y.toFixed(2)},${position.z.toFixed(2)}`;
+        
+        // Check position and adjust if necessary
+        if (usedPositions.has(positionKey)) {
+          console.warn(`Position ${positionKey} already used! Finding alternative position...`);
+          
+          let foundAlternative = false;
+          
+          for (let i = 0; i < allPlaceholders.length; i++) {
+            const altPlaceholder = allPlaceholders[i];
+            if (altPlaceholder.getAttribute('visible') === 'true') continue; // Skip already used placeholders
+            
+            const altPosition = altPlaceholder.getAttribute('position');
+            if (!altPosition) continue;
+            
+            const altPositionKey = `${altPosition.x.toFixed(2)},${altPosition.y.toFixed(2)},${altPosition.z.toFixed(2)}`;
+            
+            if (!usedPositions.has(altPositionKey)) {
+              console.log(`Found alternative position ${altPositionKey} for artwork ${index + 1}`);
+              
+              const originalRotation = placeholder.getAttribute('rotation');
+              altPlaceholder.setAttribute('rotation', originalRotation);
+              
+              placement.placeholder = altPlaceholder;
+              usedPositions.set(altPositionKey, true);
+              foundAlternative = true;
+              break;
+            }
+          }
+          
+          if (!foundAlternative) {
+            const newPosition = {
+              x: position.x + 0.3,
+              y: position.y,
+              z: position.z + 0.3
+            };
+            
+            placeholder.setAttribute('position', newPosition);
+            const newPositionKey = `${newPosition.x.toFixed(2)},${newPosition.y.toFixed(2)},${newPosition.z.toFixed(2)}`;
+            usedPositions.set(newPositionKey, true);
+            console.log(`Adjusted position for artwork ${index + 1} to avoid overlap: ${JSON.stringify(newPosition)}`);
+          }
+        } else {
+          usedPositions.set(positionKey, true);
+        }
+        
+        // Make placeholder visible
+        placement.placeholder.setAttribute('visible', 'true');
+        
+        let imageUrl = artwork.url;
+        
+        if (!imageUrl || imageUrl === 'placeholder.png') {
+          imageUrl = '../images/profileholder.png';
+        }
+        else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('../')) {
+          imageUrl = `../images/${imageUrl}`;
+        }
+        
+        console.log(`Setting artwork: ${artwork.title} with image URL: ${imageUrl}`);
+        
+        // Determine which wall this artwork is on
+        const rotation = placement.placeholder.getAttribute('rotation');
+        let wall = 'back';
+        if (rotation) {
+          const yRot = typeof rotation === 'object' ? rotation.y : 
+                     (rotation.split(' ').length > 1 ? parseFloat(rotation.split(' ')[1]) : 0);
+          
+          if (Math.abs(yRot - 90) < 10) {
+            wall = 'left';
+          } else if (Math.abs(yRot + 90) < 10) {
+            wall = 'right';
+          } else if (Math.abs(Math.abs(yRot) - 180) < 10) {
+            wall = 'front';
+          }
+        }
+        
+        const dimensions = window.scaleArtwork(placement.placeholder, artwork, wall);
+        
+        // Set the image source
+        placement.placeholder.setAttribute('src', imageUrl);
+
+        placement.placeholder.addEventListener('error', function(e) {
+          console.error(`Failed to load image: ${imageUrl}`, e);
+          this.setAttribute('src', '../images/profileholder.png');
+        });
+        
+        window.addFrameToArtwork(placement.placeholder, frameStyle, dimensions, artwork);
+        
+        window.addArtworkLabel(placement.placeholder, artwork, dimensions);
+        
+        placedArtworks.push(artwork);
+      });
     }
+  } catch (error) {
+    console.error("Error displaying artworks:", error);
+    showGalleryError(`Error displaying gallery artworks: ${error.message}`);
+  }
+  
+  console.log(`Successfully placed ${placedArtworks.length} artworks in the gallery`);
+  
+  setTimeout(() => {
+    console.log("Gallery loading completed successfully");
+  }, 1000);
+}
+
+// Display error message in the gallery
+function showGalleryError(message) {
+  const scene = document.querySelector('a-scene');
+  
+  if (scene) {
+    const errorText = document.createElement('a-text');
+    errorText.setAttribute('value', message);
+    errorText.setAttribute('color', '#ff3333');
+    errorText.setAttribute('position', '0 1.7 -2');
+    errorText.setAttribute('width', 4);
+    errorText.setAttribute('align', 'center');
     
-    artworkDetails.innerHTML = content;
-    
-    // Gallery thumbnails
-    document.querySelectorAll('.gallery-thumbnail').forEach(thumb => {
-      thumb.addEventListener('click', (event) => {
-        const mainImage = document.querySelector('.artwork-main-image');
-        mainImage.src = event.target.src;
-      });
+    scene.appendChild(errorText);
+  }
+  
+  console.error(`Gallery error: ${message}`);
+  
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'gallery-error';
+  errorDiv.textContent = message;
+  errorDiv.style.position = 'fixed';
+  errorDiv.style.top = '50%';
+  errorDiv.style.left = '50%';
+  errorDiv.style.transform = 'translate(-50%, -50%)';
+  errorDiv.style.background = 'rgba(255, 51, 51, 0.9)';
+  errorDiv.style.color = 'white';
+  errorDiv.style.padding = '15px 20px';
+  errorDiv.style.borderRadius = '5px';
+  errorDiv.style.zIndex = '1000';
+  
+  document.body.appendChild(errorDiv);
+  
+  setTimeout(() => {
+    document.body.removeChild(errorDiv);
+  }, 5000);
+}
+
+// Create a mock gallery for testing
+function createMockGallery(name, frameStyle) {
+  return {
+    name: name,
+    size: 'medium',
+    frameStyle: frameStyle || 'gold',
+    artworks: getMockArtworks(4),
+    createdAt: new Date().toISOString()
+  };
+}
+
+// Function to generate mock artworks
+function getMockArtworks(count = 4) {
+  const mockArtworks = [
+    {
+      id: 'mock1',
+      title: 'Sunset Landscape',
+      artist: 'Artist Name',
+      url: '../images/profileholder.png',
+      width: 120,
+      height: 80
+    },
+    {
+      id: 'mock2',
+      title: 'Abstract Composition',
+      artist: 'Artist Name',
+      url: '../images/profileholder.png',
+      width: 90,
+      height: 120
+    },
+    {
+      id: 'mock3',
+      title: 'Portrait Study',
+      artist: 'Artist Name',
+      url: '../images/profileholder.png',
+      width: 80,
+      height: 100
+    },
+    {
+      id: 'mock4',
+      title: 'Urban Landscape',
+      artist: 'Artist Name',
+      url: '../images/profileholder.png',
+      width: 110,
+      height: 70
+    }
+  ];
+  
+  return mockArtworks.slice(0, count);
+}
+
+/// Function to clean up unwanted elements
+function cleanupUnwantedElements() {
+  const threeElements = document.querySelectorAll('a-entity[three-object]');
+  threeElements.forEach(element => {
+    if (element.getAttribute('three-object') === 'undefined') {
+      console.log("Removing problematic three-object element");
+      element.parentNode.removeChild(element);
+    }
+  });
+}
+
+// Function to set up the back button
+function setupBackButton() {
+  const backButton = document.getElementById('backButton');
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      window.location.href = 'index.html';
     });
     
-  } catch (error) {
-    console.error("Error fetching artwork details:", error);
-    artworkDetails.innerHTML = `
-      <div class="error-message">
-        <p>Error loading artwork details</p>
-        <button class="retry-button" data-id="${artworkId}">Retry</button>
-      </div>
-    `;
-
-    const retryBtn = document.querySelector('.retry-button');
-    if (retryBtn) {
-      retryBtn.addEventListener('click', (event) => {
-        const id = event.target.getAttribute('data-id');
-        openArtworkModal(id);
-      });
-    }
-  } finally {
-    modalLoading.style.display = 'none';
+    console.log('Back button initialized');
   }
 }
 
-document.addEventListener('click', (event) => {
-  if (!searchBox.contains(event.target) && !searchResults.contains(event.target)) {
-    searchResults.style.display = 'none';
+// Set up VR Gallery object
+const VRGallery = {
+  initialize: function() {
+    console.log("VRGallery initializing...");
+    const urlParams = new URLSearchParams(window.location.search);
+    const galleryName = urlParams.get('gallery');
+    const frameStyle = urlParams.get('frameStyle') || 'gold';
+
+    if (galleryName) {
+      loadGallery(galleryName, frameStyle);
+    } else {
+      showGalleryError('Gallery name is missing in URL');
+    }
   }
-});
+};
+
+window.VRGallery = VRGallery;
+window.loadGallery = loadGallery;
+window.showGalleryError = showGalleryError;
+window.createMockGallery = createMockGallery;
+window.getMockArtworks = getMockArtworks;
+window.cleanupUnwantedElements = cleanupUnwantedElements;
+window.setupBackButton = setupBackButton;
