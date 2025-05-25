@@ -1,32 +1,44 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user')
+const User = require('../models/user');
 
+// Middleware to authenticate requests using JWT
 const authMiddleware = async (req, res, next) => {
-  // Extract the Authorization header from the incoming request
-  const authHeader = req.header('Authorization');
-
-  // If the Authorization header is missing or doesn't start with 'Bearer ', reject the request
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(403).json({ message: 'No or invalid token provided' });
-  }
-
-  // Extract the token by splitting the header on space and taking the second part
-  const token = authHeader.split(' ')[1];
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    const authHeader = req.header('Authorization');
 
-    if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+    // If the Authorization header is missing or doesn't start with 'Bearer ', reject the request
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('Missing or invalid Authorization header');
+      return res.status(401).json({ error: 'Authentication required' });
     }
 
-    // Attach the user object to the request for use in subsequent middleware/routes
+    const token = authHeader.split(' ')[1];
+
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Log the decoded token for debugging
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      console.log(`User not found with ID: ${decoded.id}`);
+      return res.status(401).json({ error: 'User not found' });
+    }
+
     req.user = user;
+    console.log(`Authenticated user: ${user._id} (${user.username || 'no username'})`);
+    
     next();
   } catch (err) {
-    console.error('Token verification failed:', err.message);
-    res.status(403).json({ message: 'Invalid token' });
+    console.error('Authentication error:', err.message);
+    
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    } else if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expired' });
+    }
+    
+    res.status(401).json({ error: 'Authentication failed' });
   }
 };
 

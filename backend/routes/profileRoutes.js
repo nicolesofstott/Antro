@@ -10,7 +10,6 @@ const fs = require('fs');
 // Configure multer for profile picture uploads
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    // Get the user ID from the authenticated request
     const userId = req.user._id.toString();
     
     // Create user-specific directories if they don't exist
@@ -62,14 +61,12 @@ router.post('/upload-profile-pic', authMiddleware, upload.single('profilePic'), 
       return res.status(400).json({ error: 'No file uploaded' });
     }
     
-    // Get current user
     const user = await User.findById(req.user._id);
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // If user already has a profile pic, delete the old one
     if (user.profilePic) {
       const oldFilePath = path.join(__dirname, '../uploads', user._id.toString(), 'profiles', user.profilePic);
       if (fs.existsSync(oldFilePath)) {
@@ -84,7 +81,6 @@ router.post('/upload-profile-pic', authMiddleware, upload.single('profilePic'), 
     
     user.profilePic = req.file.filename;
     
-    // Create a URL
     const profilePicUrl = `${req.protocol}://${req.get('host')}/uploads/${user._id}/profiles/${req.file.filename}`;
     user.profilePicUrl = profilePicUrl;
     
@@ -111,14 +107,12 @@ router.delete('/remove-profile-pic', authMiddleware, async (req, res) => {
   try {
     console.log('Processing profile picture removal');
     
-    // Get current user
     const user = await User.findById(req.user._id);
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // If user has a profile pic, delete it
     if (user.profilePic) {
       const filePath = path.join(__dirname, '../uploads', user._id.toString(), 'profiles', user.profilePic);
       if (fs.existsSync(filePath)) {

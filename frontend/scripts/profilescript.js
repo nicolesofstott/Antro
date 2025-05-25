@@ -5,7 +5,7 @@ import { loadUserArtworks, setupArtworkUpload } from './artworkManager.js';
 import { setupFileUploads, loadUserFiles } from './fileManager.js';
 import { fetchCurrentUser } from './profileData.js';
 
-// Main initialization function
+// Main initialisation function
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("Initializing profile page...");
   
@@ -52,3 +52,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   console.log("Profile page initialization complete");
 });
+

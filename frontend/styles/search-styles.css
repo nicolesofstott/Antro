@@ -77,13 +77,17 @@
   z-index: 10;
   display: none;
   margin-top: 5px;
+  border: 1px solid #e0e0e0;
 }
 
 .search-result-item {
-  padding: 12px 15px;
+  padding: 15px;
   border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .search-result-item:last-child {
@@ -94,14 +98,57 @@
   background-color: #f9f9f9;
 }
 
+/* Profile results styling */
+.search-result-item .result-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .result-title {
   font-weight: 600;
-  margin-bottom: 3px;
+  font-size: 1rem;
+  color: #010101;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .result-category {
   font-size: 0.85rem;
   color: #777;
+  margin: 0;
+}
+
+/* Artist badge styling */
+.badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge.orange {
+  background-color: var(--accent-1);
+  color: white;
+}
+
+.badge.blue {
+  background-color: var(--accent-3);
+  color: var(--text-on-light-blue);
+}
+
+.badge.pink {
+  background-color: var(--accent-2);
+  color: var(--text-on-pink);
+}
+
+/* Artwork results styling */
+.result-artwork {
+  align-items: flex-start;
 }
 
 .result-artwork img {
@@ -109,18 +156,81 @@
   height: 50px;
   object-fit: cover;
   border-radius: var(--border-radius-sm);
-  margin-right: 15px;
+  flex-shrink: 0;
 }
 
-.result-artwork {
+.result-artwork .result-content {
+  padding-top: 2px;
+}
+
+/* Gallery results styling */
+.search-result-item.gallery-result {
+  padding: 12px 15px;
+}
+
+.gallery-result .result-title {
+  color: var(--accent-5);
+}
+
+/* Profile avatar placeholder */
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--accent-3);
   display: flex;
   align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--text-on-light-blue);
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
-.search-no-results {
+.profile-avatar.artist {
+  background-color: var(--accent-1);
+  color: white;
+}
+
+/* Loading and empty states */
+.search-loading-text {
   padding: 20px;
   text-align: center;
   color: #777;
+  font-style: italic;
+}
+
+.search-no-results {
+  padding: 25px 20px;
+  text-align: center;
+  color: #777;
+}
+
+.search-no-results p:first-child {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.search-no-results p:last-child {
+  font-size: 0.9rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Username styling */
+.username {
+  color: var(--accent-5);
+  font-weight: 400;
+}
+
+/* Category icons */
+.category-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  opacity: 0.6;
 }
 
 /* Responsive adjustments */
@@ -131,5 +241,40 @@
   
   .search-results {
     max-height: 300px;
+  }
+  
+  .search-result-item {
+    padding: 12px;
+  }
+  
+  .profile-avatar {
+    width: 35px;
+    height: 35px;
+    font-size: 0.8rem;
+  }
+  
+  .result-artwork img {
+    width: 45px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-result-item {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .result-title {
+    font-size: 0.95rem;
+  }
+  
+  .result-category {
+    font-size: 0.8rem;
+  }
+  
+  .badge {
+    font-size: 0.65rem;
+    padding: 1px 6px;
   }
 }

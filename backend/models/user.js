@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 // Define the schema for a User document
 const userSchema = new mongoose.Schema({
-  // Basic user info fields
   name: String, 
 
   email: { 

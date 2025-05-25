@@ -1,14 +1,25 @@
-
 function resizeRoom(roomSize) {
     console.log(`Resizing room to ${roomSize} size`);
     
-    // Get configuration for the specified room size
-    const config = GalleryConfig.roomSizes[roomSize] || GalleryConfig.roomSizes.medium;
-    const size = config.size || 7; // Default size if not specified
-    const height = config.height || 3; // Default height
-    const wallPos = size / 2; // Wall distance from center
+    // Define default configurations if GalleryConfig is not available
+    const defaultSizes = {
+        small: { size: 3, height: 2.5 },
+        medium: { size: 5, height: 3 },
+        large: { size: 7, height: 3.5 }
+    };
     
-    // Get room elements by ID (more reliable than position selectors)
+    const config = window.GalleryConfig?.sizes?.[roomSize] || 
+                  defaultSizes[roomSize] || 
+                  defaultSizes.medium;
+                  
+    const size = config.roomWidth || config.size || 5;
+    const height = config.wallHeight || config.height || 3; 
+    const wallPos = size / 2; 
+    
+    console.log(`Using room config:`, config);
+    console.log(`Room size: ${size}, height: ${height}, wall position: ${wallPos}`);
+    
+    // Get room elements by ID
     const floor = document.getElementById('floor') || document.querySelector('a-box[position="0 -0.05 0"]');
     const ceiling = document.getElementById('ceiling') || document.querySelector('a-box[position="0 3.05 0"]');
     const backWall = document.getElementById('back-wall');
@@ -27,7 +38,7 @@ function resizeRoom(roomSize) {
       ceiling.setAttribute('depth', size);
     }
     
-    // Resize and reposition walls based on their element type
+    // Resize and reposition walls
     if (backWall) {
       if (backWall.tagName.toLowerCase() === 'a-plane') {
         backWall.setAttribute('width', size);
@@ -50,7 +61,7 @@ function resizeRoom(roomSize) {
     
     if (leftWall) {
       if (leftWall.tagName.toLowerCase() === 'a-plane') {
-        leftWall.setAttribute('width', size); // For a-plane, width is front to back when rotated
+        leftWall.setAttribute('width', size); 
         leftWall.setAttribute('height', height);
       } else {
         leftWall.setAttribute('depth', size);
@@ -60,7 +71,7 @@ function resizeRoom(roomSize) {
     
     if (rightWall) {
       if (rightWall.tagName.toLowerCase() === 'a-plane') {
-        rightWall.setAttribute('width', size); // For a-plane, width is front to back when rotated
+        rightWall.setAttribute('width', size); 
         rightWall.setAttribute('height', height);
       } else {
         rightWall.setAttribute('depth', size);
@@ -68,10 +79,10 @@ function resizeRoom(roomSize) {
       rightWall.setAttribute('position', {x: wallPos, y: 1.5, z: 0});
     }
     
-    // Update baseboards
+    // Baseboard and crown molding adjustments 
     document.querySelectorAll('.baseboard, a-box[position*="0.1"]').forEach(element => {
       const position = element.getAttribute('position');
-      if (!position) return; // Skip if position is undefined
+      if (!position) return; 
       
       const x = typeof position === 'object' ? position.x : parseFloat(position.split(' ')[0]);
       const y = typeof position === 'object' ? position.y : parseFloat(position.split(' ')[1]);
@@ -88,7 +99,6 @@ function resizeRoom(roomSize) {
       }
     });
     
-    // Update crown moldings
     document.querySelectorAll('.crown-molding, a-box[position*="2.95"]').forEach(element => {
       const position = element.getAttribute('position');
       if (!position) return; // Skip if position is undefined
@@ -112,37 +122,38 @@ function resizeRoom(roomSize) {
     return size / 7; 
   }
   
-/**
- * Calculate optimal positions for artworks on each wall
- * @param {Array} artworks - Artwork objects to position
- * @param {string} roomSize - Size option (small, medium, large)
- * @returns {Array} Wall positions for artworks
- */
+// Calculate optimal positions for artworks based on room size and number of artworks
 function calculateOptimalPositions(artworks, roomSize) {
-    // Initialize walls array
     const galleryWalls = [
       { name: 'back', positions: [] },
       { name: 'left', positions: [] },
       { name: 'right', positions: [] },
       { name: 'front', positions: [] }
     ];
+
+    const defaultSizes = {
+        small: { size: 3, height: 2.5 },
+        medium: { size: 5, height: 3 },
+        large: { size: 7, height: 3.5 }
+    };
     
-    // Get room configuration
-    const config = GalleryConfig.roomSizes[roomSize] || GalleryConfig.roomSizes.medium;
-    const size = config.size || 7; 
+    // Get room configuration with fallback
+    const config = window.GalleryConfig?.sizes?.[roomSize] || 
+                  defaultSizes[roomSize] || 
+                  defaultSizes.medium;
+                  
+    const size = config.roomWidth || config.size || 5;
     const wallPos = size / 2;
     
     const height = config.artworkY || 1.5;
     
-    // Wall coordinates with proper offset to place artworks ON the walls
-    // Add precise offsets to ensure artworks are positioned correctly on walls
+    // Calculate wall positions
     const WALL_THICKNESS = 0.1;
-    const backWallZ = -wallPos + (WALL_THICKNESS / 2) + 0.06;  // Increased offset
-    const frontWallZ = wallPos - (WALL_THICKNESS / 2) - 0.06;  // Increased offset
-    const leftWallX = -wallPos + (WALL_THICKNESS / 2) + 0.06;  // Increased offset
-    const rightWallX = wallPos - (WALL_THICKNESS / 2) - 0.06;  // Increased offset
+    const backWallZ = -wallPos + (WALL_THICKNESS / 2) + 0.06;  
+    const frontWallZ = wallPos - (WALL_THICKNESS / 2) - 0.06;  
+    const leftWallX = -wallPos + (WALL_THICKNESS / 2) + 0.06;  
+    const rightWallX = wallPos - (WALL_THICKNESS / 2) - 0.06; 
     
-    // How many artworks to place on each wall
     const totalArtworks = artworks.length;
     let artworksPerWall = {};
     
@@ -172,7 +183,7 @@ function calculateOptimalPositions(artworks, roomSize) {
     
     console.log(`Artwork distribution: Back=${artworksPerWall.back}, Left=${artworksPerWall.left}, Right=${artworksPerWall.right}, Front=${artworksPerWall.front}`);
     
-    // Scale factor for spacing (based on room size)
+    // Scale
     const scale = size / 7;
     
     // Calculate optimal positions for each wall
@@ -182,7 +193,6 @@ function calculateOptimalPositions(artworks, roomSize) {
       if (count === 0) return;
       
       if (count === 1) {
-        // Single artwork centered on wall
         if (wall === 'back') {
           galleryWalls[0].positions.push([0, height, backWallZ]);
         } else if (wall === 'left') {
@@ -193,8 +203,7 @@ function calculateOptimalPositions(artworks, roomSize) {
           galleryWalls[3].positions.push([0, height, frontWallZ]);
         }
       } else if (count === 2) {
-        // Two artworks with scaled spacing
-        const spacing = 1.5 * scale; // Reduced spacing to prevent overlaps
+        const spacing = 1.5 * scale;
         
         if (wall === 'back') {
           galleryWalls[0].positions.push([-spacing, height, backWallZ]);
@@ -210,8 +219,7 @@ function calculateOptimalPositions(artworks, roomSize) {
           galleryWalls[3].positions.push([spacing, height, frontWallZ]);
         }
       } else {
-        // Three artworks with scaled spacing
-        const spacing = 2.0 * scale; // Reduced spacing to prevent overlaps
+        const spacing = 2.0 * scale; 
         
         if (wall === 'back') {
           galleryWalls[0].positions.push([-spacing, height, backWallZ]);
@@ -236,24 +244,16 @@ function calculateOptimalPositions(artworks, roomSize) {
     return galleryWalls;
   }
   
-/**
- * Distribute artworks to the calculated wall positions
- * @param {Array} placements - Initial artwork placement objects
- * @param {Array} galleryWalls - Calculated wall positions
- * @param {Array} placeholders - Placeholder elements for artworks
- * @returns {Array} Updated artwork placements
- */
+// Redistribute artworks to walls based on calculated positions
 function redistributeArtworksToWalls(placements, galleryWalls, placeholders) {
     console.log("Redistributing artworks to walls");
     
-    // Flatten wall positions into a single array
     let allPositions = [];
     let wallMap = {};
     
     galleryWalls.forEach((wall, wallIndex) => {
       wall.positions.forEach((pos, posIndex) => {
         allPositions.push(pos);
-        // Map this position to its wall and position index
         wallMap[allPositions.length - 1] = { wall: wallIndex, position: posIndex };
       });
     });
@@ -261,12 +261,10 @@ function redistributeArtworksToWalls(placements, galleryWalls, placeholders) {
     // Calculate total available positions
     const totalPositions = allPositions.length;
     
-    // If we have more artworks than positions, limit to available positions
     const validPlacements = placements.slice(0, Math.min(placements.length, totalPositions));
     
-    // Assign artworks to positions with specific rotations for each wall
+    // Ensure placeholders are set for valid placements
     validPlacements.forEach((placement, index) => {
-      // Get the corresponding wall and position
       const posIndex = index % totalPositions;
       const position = allPositions[posIndex];
       const wallInfo = wallMap[posIndex];
@@ -284,16 +282,16 @@ function redistributeArtworksToWalls(placements, galleryWalls, placeholders) {
         
         if (wallInfo) {
           switch (wallInfo.wall) {
-            case 0: // back wall
+            case 0: 
               rotation = { x: 0, y: 0, z: 0 };
               break;
-            case 1: // left wall
+            case 1: 
               rotation = { x: 0, y: 90, z: 0 };
               break;
-            case 2: // right wall
+            case 2: 
               rotation = { x: 0, y: -90, z: 0 };
               break;
-            case 3: // front wall
+            case 3:
               rotation = { x: 0, y: 180, z: 0 };
               break;
           }
@@ -303,7 +301,6 @@ function redistributeArtworksToWalls(placements, galleryWalls, placeholders) {
       }
     });
     
-    // Track used positions to avoid overlaps
     const usedPositions = new Set();
     
     // Check for overlaps and fix if needed
@@ -316,7 +313,6 @@ function redistributeArtworksToWalls(placements, galleryWalls, placeholders) {
       const positionKey = `${position.x.toFixed(2)},${position.y.toFixed(2)},${position.z.toFixed(2)}`;
       
       if (usedPositions.has(positionKey)) {
-        // Find an available placeholder
         for (let i = 0; i < placeholders.length; i++) {
           const alternativePlaceholder = placeholders[i];
           const altPosition = alternativePlaceholder.getAttribute('position');
@@ -327,7 +323,6 @@ function redistributeArtworksToWalls(placements, galleryWalls, placeholders) {
           if (!usedPositions.has(altPositionKey)) {
             console.log(`Found alternative position ${altPositionKey} for overlapping artwork`);
             
-            // Move artwork to this position
             placement.placeholder.setAttribute('position', altPosition);
             usedPositions.add(altPositionKey);
             break;
@@ -341,41 +336,31 @@ function redistributeArtworksToWalls(placements, galleryWalls, placeholders) {
     return validPlacements;
   }
   
-/**
- * Position the camera based on room size
- * @param {string} roomSize - Size option (small, medium, large)
- */
+// Position the camera based on room size
 function positionCamera(roomSize) {
-    const cameraRig = document.getElementById('cameraRig');
-    if (!cameraRig) {
-      console.error("Camera rig not found!");
-      return;
-    }
-    
-    // Adjust height based on room size
-    const height = roomSize === 'small' ? 0.8 : 
-                  roomSize === 'large' ? 1.0 : 0.9;
-    
-    cameraRig.setAttribute('position', {x: 0, y: height, z: 0});
-    console.log(`Camera positioned at height ${height}`);
-    
-    // Add look controls
-    const camera = document.querySelector('a-camera');
-    if (camera && !camera.getAttribute('look-controls')) {
-      camera.setAttribute('look-controls', 'pointerLockEnabled: true');
-      console.log("Added look-controls to camera");
-    }
+  const cameraRig = document.getElementById('cameraRig');
+  if (!cameraRig) {
+    console.error("Camera rig not found!");
+    return;
   }
   
-/**
- * Ensure pointer lock is enabled for VR controls
- */
+  const height = 0.5;
+
+  cameraRig.setAttribute('position', {x: 0, y: height, z: 0});
+  console.log(`Camera positioned at height ${height}`);
+  
+  const camera = document.querySelector('a-camera');
+  if (camera && !camera.getAttribute('look-controls')) {
+    camera.setAttribute('look-controls', 'pointerLockEnabled: true');
+    console.log("Added look-controls to camera");
+  }
+}
+  
+// Pointerlock
 function ensurePointerLock() {
-    // Check if pointer lock is already working
     const camera = document.querySelector('a-camera');
     if (!camera) return;
     
-    // Check if camera already has look-controls
     const lookControls = camera.getAttribute('look-controls');
     if (!lookControls) {
       camera.setAttribute('look-controls', 'pointerLockEnabled: true');
@@ -386,7 +371,6 @@ function ensurePointerLock() {
     console.log("Pointer lock configuration ensured");
   }
   
-// Export functions globally
 window.resizeRoom = resizeRoom;
 window.calculateOptimalPositions = calculateOptimalPositions;
 window.redistributeArtworksToWalls = redistributeArtworksToWalls;

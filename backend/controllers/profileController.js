@@ -112,11 +112,9 @@ const updateProfileHandler = async (req, res) => {
 // Get current user profile
 const getCurrentUserProfile = async (req, res) => {
   try {
-    // Get user data (excluding password)
     const userData = req.user.toObject();
     delete userData.password;
     
-    // Add full URL for profile pic if it exists
     if (userData.profilePic) {
       userData.profilePicUrl = `${req.protocol}://${req.get('host')}/uploads/${userData._id}/profiles/${userData.profilePic}`;
     }

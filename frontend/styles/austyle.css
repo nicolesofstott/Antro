@@ -109,6 +109,7 @@
   box-shadow: var(--shadow-soft);
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
   .mission-content, .story-content {
     flex-direction: column;

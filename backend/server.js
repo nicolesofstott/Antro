@@ -56,7 +56,7 @@ if (!fs.existsSync(artworksDir)) {
   fs.mkdirSync(artworksDir, { recursive: true });
 }
 
-// Create a simple default profile image
+// Default profile image
 const defaultProfilePath = path.join(profilesDir, 'default-profile.png');
 if (!fs.existsSync(defaultProfilePath)) {
   try {
@@ -68,7 +68,7 @@ if (!fs.existsSync(defaultProfilePath)) {
   }
 }
 
-// Create a simple default artwork image
+// Default artwork image
 const defaultArtworkPath = path.join(artworksDir, 'default-artwork.png');
 if (!fs.existsSync(defaultArtworkPath)) {
   try {
@@ -80,31 +80,26 @@ if (!fs.existsSync(defaultArtworkPath)) {
   }
 }
 
-// Serve static files 
 app.use('/uploads', express.static(uploadsDir));
 console.log('Uploads directory:', uploadsDir);
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// API Routes
 const authRoutes = require('./routes/authRoutes');
 const artworkRoutes = require('./routes/artworkRoutes');
 const fileRoutes = require('./routes/fileRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const vrGalleryRoutes = require('./routes/vrGalleryRoutes');
+const opportunityRoutes = require('./routes/opportunityRoutes');
 
-// Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/artworks', artworkRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api', searchRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/galleries', vrGalleryRoutes);
-
-app.get('/artwork.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/artwork.html'));
-});
+app.use('/api/opportunities', opportunityRoutes);
 
 // Serve any HTML files directly from frontend directory
 app.get('/*.html', (req, res) => {
@@ -113,7 +108,7 @@ app.get('/*.html', (req, res) => {
 
 // Serve profile page
 app.get('/profile.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/profile.html'));
+  res.sendFile(path.join(__dirname, '../frontend/profile/profile.html'));
 });
 
 // Serve homepage 
@@ -133,7 +128,7 @@ app.get('/artwork/:id', (req, res) => {
 
 // Route for the VR gallery
 app.get('/gallery/:id', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/Create gallery/creategallery.html'));
+  res.sendFile(path.join(__dirname, '../frontend/creategallery.html'));
 });
 
 app.use((req, res) => {
@@ -164,11 +159,11 @@ app.use((err, req, res, next) => {
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log("✅ Connected to MongoDB");
+    console.log("Connected to MongoDB");
     app.listen(PORT, () => {
-      console.log(`✅ Server running on http://localhost:${PORT}`);
+      console.log(`Server running on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("MongoDB connection error:", err);
   });

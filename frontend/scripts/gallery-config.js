@@ -1,104 +1,188 @@
+// Gallery configuration module
 const GalleryConfig = {
-    // Room size configurations
-    roomSizes: {
-      small: {
-        size: 7,        
-        height: 3,      
-        artworkY: 1.5   
-      },
-      medium: {
-        size: 10,
-        height: 4,
-        artworkY: 1.6
-      },
-      large: {
-        size: 14,
-        height: 5,
-        artworkY: 1.7
+  defaultSettings: {
+    size: 'medium',
+    frameStyle: 'gold',
+    isPublic: true
+  },
+  
+  // Gallery size options 
+  sizes: {
+    small: {
+      roomWidth: 3,
+      roomHeight: 3,
+      wallHeight: 2.5,
+      maxArtworks: 4,
+      size: 3,
+      height: 2.5
+    },
+    medium: {
+      roomWidth: 5,
+      roomHeight: 5,
+      wallHeight: 3,
+      maxArtworks: 8,
+      size: 5, 
+      height: 3
+    },
+    large: {
+      roomWidth: 7,
+      roomHeight: 7,
+      wallHeight: 3.5,
+      maxArtworks: 12,
+      size: 7, 
+      height: 3.5
+    }
+  },
+  
+  // Frame style options with material textures
+  frameStyles: {
+    gold: {
+      color: '#b4a053',
+      material: 'metallic',
+      width: 0.05
+    },
+    black: {
+      color: '#222222',
+      material: 'matte',
+      width: 0.04
+    },
+    white: {
+      color: '#f8f8f8',
+      material: 'matte',
+      width: 0.04
+    },
+    natural: {
+      color: '#96673b',
+      material: 'wood',
+      width: 0.06
+    }
+  },
+  
+  // Wall colours
+  wallColors: {
+    default: '#f0f0f0',
+    floor: '#d6d6d6',
+    ceiling: '#ffffff'
+  },
+  
+  // Calculate artwork placement based on gallery size and selected artworks
+  calculateArtworkPlacements: function(gallerySize, artworks) {
+    const sizeConfig = this.sizes[gallerySize] || this.sizes.medium;
+    const { roomWidth, wallHeight } = sizeConfig;
+    
+    const wallLength = roomWidth - 0.5;
+    
+    const placements = [];
+    const artworksPerWall = Math.ceil(artworks.length / 4); 
+    
+    artworks.forEach((artwork, index) => {
+      const wallIndex = Math.floor(index / artworksPerWall);
+      const positionOnWall = (index % artworksPerWall) / (artworksPerWall > 1 ? artworksPerWall - 1 : 1);
+      
+      // Scale artwork
+      let width = artwork.width || 100;
+      let height = artwork.height || 100;
+      const maxDimension = wallHeight * 0.8;
+      
+      if (width > height && width > maxDimension) {
+        const scale = maxDimension / width;
+        width = maxDimension;
+        height *= scale;
+      } else if (height > width && height > maxDimension) {
+        const scale = maxDimension / height;
+        height = maxDimension;
+        width *= scale;
       }
-    },
-    
-    // Frame style colors and settings
-    frameStyles: {
-      gold: {
-        color: "#AC9362",
-        metalness: 0.2,
-        roughness: 0.7
-      },
-      black: {
-        color: "#111111",
-        metalness: 0.1,
-        roughness: 0.9
-      },
-      white: {
-        color: "#f8f8f8",
-        metalness: 0.0,
-        roughness: 0.9
-      },
-      natural: {
-        color: "#a98467",
-        metalness: 0.1,
-        roughness: 0.8
+      
+      const widthInMeters = width / 100;
+      const heightInMeters = height / 100;
+      
+      // Calculate position and rotation based on wall index
+      let position, rotation;
+      
+      switch (wallIndex) {
+        case 0: 
+          position = {
+            x: -wallLength / 2 + wallLength * positionOnWall,
+            y: wallHeight / 2,
+            z: -wallLength / 2
+          };
+          rotation = { x: 0, y: 0, z: 0 };
+          break;
+        case 1: 
+          position = {
+            x: wallLength / 2,
+            y: wallHeight / 2,
+            z: -wallLength / 2 + wallLength * positionOnWall
+          };
+          rotation = { x: 0, y: -90, z: 0 };
+          break;
+        case 2: 
+          position = {
+            x: wallLength / 2 - wallLength * positionOnWall,
+            y: wallHeight / 2,
+            z: wallLength / 2
+          };
+          rotation = { x: 0, y: 180, z: 0 };
+          break;
+        case 3: 
+          position = {
+            x: -wallLength / 2,
+            y: wallHeight / 2,
+            z: wallLength / 2 - wallLength * positionOnWall
+          };
+          rotation = { x: 0, y: 90, z: 0 };
+          break;
+        default:
+          position = {
+            x: -wallLength / 2 + wallLength * Math.random(),
+            y: wallHeight / 2,
+            z: -wallLength / 2
+          };
+          rotation = { x: 0, y: 0, z: 0 };
       }
-    },
+      
+      placements.push({
+        artworkId: artwork.id || artwork._id,
+        title: artwork.title || 'Untitled',
+        artist: artwork.artist || 'Unknown Artist',
+        url: artwork.url || artwork.mainImageUrl,
+        width: widthInMeters,
+        height: heightInMeters,
+        position,
+        rotation
+      });
+    });
     
-    // Material configurations
-    materials: {
-      floor: "color: #AC9362; roughness: 0.95; metalness: 0",
-      walls: "color: #ffffff; roughness: 1; metalness: 0; side: double",
-      ceiling: "color: #f2f0ef; roughness: 1; metalness: 0; side: double"
-    },
-    
-    // Artwork display settings
-    artwork: {
-      maxWidth: 3.0,       
-      maxHeight: 2.5,       
-      panoramicRatio: 2.0, 
-      portraitRatio: 0.7,  
-      framePadding: 0.02,    
-      frameThickness: 0.05,  
-      frameDepth: 0.03,     
-      defaultWidth: 100,    
-      defaultHeight: 150    
-    },
-    
-    // Default paths
-    paths: {
-      images: "images/",
-      placeholder: "images/placeholder.png"
-    },
-    
-    // Lighting settings
-    lighting: {
-      ambient: {
-        intensity: 0.5,
-        color: "#ffffff"
-      },
-      directional: [
+    return placements;
+  },
+  
+  // Add a mockup gallery data function for when GalleryData isn't available
+  mockGalleryData: function(name) {
+    return {
+      name: name || "Mock Gallery",
+      size: "medium",
+      frameStyle: "gold",
+      artworks: [
         {
-          position: "1 1 1",
-          intensity: 0.6,
-          color: "#ffffff"
+          id: 'mock1',
+          title: 'Sunset Landscape',
+          artist: 'Artist Name',
+          url: '../images/profileholder.png',
+          width: 120,
+          height: 80
         },
         {
-          position: "-1 1 1",
-          intensity: 0.4,
-          color: "#ffffff"
+          id: 'mock2',
+          title: 'Abstract Composition',
+          artist: 'Artist Name',
+          url: '../images/profileholder.png',
+          width: 90,
+          height: 120
         }
-      ],
-      spotlight: {
-        intensity: 0.3,
-        distance: 5,
-        angle: 30,
-        penumbra: 0.2,
-        color: "#ffffff"
-      }
-    },
-    
-    ui: {
-      instructionsFadeTime: 5000,  
-      instructionsOpacity: 0.7,   
-      backButtonPosition: "20px 20px", 
-      instructionsPosition: "bottom center" 
-    }
-  };
+      ]
+    };
+  }
+};
+
+window.GalleryConfig = GalleryConfig;

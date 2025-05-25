@@ -8,7 +8,7 @@ const uploadArtworkHandler = async (req, res) => {
     const { title, dimensions, description } = req.body;
     const userId = req.user._id;
     
-    // Verify artist profile
+    // Artist profile
     if (!req.user.email.endsWith('@arts.ac.uk')) {
       return res.status(403).json({ 
         error: "Only users with @arts.ac.uk email addresses can upload artwork",
@@ -16,12 +16,10 @@ const uploadArtworkHandler = async (req, res) => {
       });
     }
     
-    // Make sure files exist
     if (!req.files || !req.files.mainImage || !req.files.mainImage.length) {
       return res.status(400).json({ error: "Main image is required" });
     }
     
-    // Store only the relative path from uploads directory
     const mainImagePath = `uploads/${userId}/artworks/${req.files.mainImage[0].filename}`;
     
     let extraImagePaths = [];
@@ -42,7 +40,6 @@ const uploadArtworkHandler = async (req, res) => {
 
     await newArtwork.save();
     
-    // Add full URLs for the frontend
     const baseUrl = `${req.protocol}://${req.get('host')}/`;
     const responseArtwork = {
       ...newArtwork.toObject(),
@@ -61,10 +58,11 @@ const uploadArtworkHandler = async (req, res) => {
   }
 };
 
-// Get User Artworks
+// Get User Artworks with proper user population and dimension parsing
 const getUserArtworks = async (req, res) => {
   try {
-    const artworks = await Artwork.find({ user: req.user._id });
+    const artworks = await Artwork.find({ user: req.user._id })
+      .populate('user', 'username displayName fullName email'); // Populate user fields
     
     const baseUrl = `${req.protocol}://${req.get('host')}/`;
     const artworksWithUrls = artworks.map(artwork => {
@@ -84,13 +82,47 @@ const getUserArtworks = async (req, res) => {
           baseUrl + 'uploads/' + imgPath;
       });
       
+      // Parse dimensions string into width and height properties with validation
+      let width = 100;
+      let height = 100;
+      
+      if (art.dimensions && typeof art.dimensions === 'string') {
+        const dimensionMatch = art.dimensions.match(/^(\d{1,3})x(\d{1,3})$/);
+        if (dimensionMatch) {
+          const parsedWidth = parseInt(dimensionMatch[1], 10);
+          const parsedHeight = parseInt(dimensionMatch[2], 10);
+          
+          if (parsedWidth > 0 && parsedHeight > 0) {
+            width = parsedWidth;
+            height = parsedHeight;
+          } else {
+            console.warn(`Invalid dimensions parsed for artwork ${art._id}: ${art.dimensions}`);
+          }
+        } else {
+          console.warn(`Invalid dimensions format for artwork ${art._id}: ${art.dimensions}`);
+        }
+      }
+      
+      let artistName = 'Unknown Artist';
+      if (art.user && typeof art.user === 'object') {
+        artistName = art.user.displayName || 
+                   art.user.fullName || 
+                   art.user.username || 
+                   'Unknown Artist';
+      }
+      
       return {
         ...art,
         mainImageUrl,
-        extraImageUrls
+        extraImageUrls,
+        width,
+        height,
+        artist: artistName, 
+        user: art.user
       };
     });
     
+    console.log(`Returned ${artworksWithUrls.length} artworks with proper dimensions and artist info`);
     res.json(artworksWithUrls);
   } catch (err) {
     console.error("Error fetching artworks:", err);
@@ -98,10 +130,12 @@ const getUserArtworks = async (req, res) => {
   }
 };
 
-// Get All Artworks
+// Get All Artworks with proper user population
 const getAllArtworks = async (req, res) => {
   try {
-    const artworks = await Artwork.find().populate('user', '_id username');
+    // Populate user information for artist names
+    const artworks = await Artwork.find()
+      .populate('user', 'username displayName fullName email');
     
     const baseUrl = `${req.protocol}://${req.get('host')}/`;
     const artworksWithUrls = artworks.map(artwork => {
@@ -121,10 +155,38 @@ const getAllArtworks = async (req, res) => {
           baseUrl + 'uploads/' + imgPath;
       });
       
+      // Parse dimensions and add artist name
+      let width = 100;
+      let height = 100;
+      
+      if (art.dimensions && typeof art.dimensions === 'string') {
+        const dimensionMatch = art.dimensions.match(/^(\d{1,3})x(\d{1,3})$/);
+        if (dimensionMatch) {
+          const parsedWidth = parseInt(dimensionMatch[1], 10);
+          const parsedHeight = parseInt(dimensionMatch[2], 10);
+          
+          if (parsedWidth > 0 && parsedHeight > 0) {
+            width = parsedWidth;
+            height = parsedHeight;
+          }
+        }
+      }
+      
+      let artistName = 'Unknown Artist';
+      if (art.user && typeof art.user === 'object') {
+        artistName = art.user.displayName || 
+                   art.user.fullName || 
+                   art.user.username || 
+                   'Unknown Artist';
+      }
+      
       return {
         ...art,
         mainImageUrl,
-        extraImageUrls
+        extraImageUrls,
+        width,
+        height,
+        artist: artistName
       };
     });
     
@@ -135,10 +197,13 @@ const getAllArtworks = async (req, res) => {
   }
 };
 
-// Get Single Artwork
+// Get Single Artwork with proper user population
 const getArtworkById = async (req, res) => {
   try {
-    const artwork = await Artwork.findById(req.params.id).populate('user', '_id username');
+    // Populate user information
+    const artwork = await Artwork.findById(req.params.id)
+      .populate('user', 'username displayName fullName email');
+      
     if (!artwork) return res.status(404).json({ error: "Artwork not found" });
     
     const baseUrl = `${req.protocol}://${req.get('host')}/`;
@@ -158,10 +223,38 @@ const getArtworkById = async (req, res) => {
         baseUrl + 'uploads/' + imgPath;
     });
     
+    // Parse dimensions and add artist name
+    let width = 100;
+    let height = 100;
+    
+    if (art.dimensions && typeof art.dimensions === 'string') {
+      const dimensionMatch = art.dimensions.match(/^(\d{1,3})x(\d{1,3})$/);
+      if (dimensionMatch) {
+        const parsedWidth = parseInt(dimensionMatch[1], 10);
+        const parsedHeight = parseInt(dimensionMatch[2], 10);
+        
+        if (parsedWidth > 0 && parsedHeight > 0) {
+          width = parsedWidth;
+          height = parsedHeight;
+        }
+      }
+    }
+    
+    let artistName = 'Unknown Artist';
+    if (art.user && typeof art.user === 'object') {
+      artistName = art.user.displayName || 
+                 art.user.fullName || 
+                 art.user.username || 
+                 'Unknown Artist';
+    }
+    
     const artworkWithUrls = {
       ...art,
       mainImageUrl,
-      extraImageUrls
+      extraImageUrls,
+      width,
+      height,
+      artist: artistName
     };
     
     res.json(artworkWithUrls);
@@ -192,11 +285,8 @@ const deleteArtwork = async (req, res) => {
       const fullPath = path.join(basePath, imgPath);
       if (fs.existsSync(fullPath)) {
        fs.unlinkSync(fullPath);
-  
       }
     });
-
-
 
     await Artwork.findByIdAndDelete(req.params.id);
     res.json({ message: "Artwork deleted successfully" });

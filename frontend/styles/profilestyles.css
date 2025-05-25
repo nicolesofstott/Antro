@@ -320,6 +320,83 @@
   z-index: 10;
 }
 
+/* Enhanced file preview styles */
+.pdf-preview, 
+.resume-preview, 
+.portfolio-preview {
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.pdf-preview iframe {
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.file-preview-container {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.file-preview-error {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-style: italic;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 2px dashed #ddd;
+}
+
+.file-download-link {
+  display: inline-block;
+  background-color: var(--accent-1);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.file-download-link:hover {
+  background-color: #D56A2B;
+  color: white;
+}
+
+/* Public profile specific adjustments */
+.public-profile .tab-content {
+  min-height: 400px;
+}
+
+.public-profile .file-preview {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Empty state styling */
+.empty-file-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.empty-file-state::before {
+  content: "📄";
+  display: block;
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
 /* Modal styling enhancements for artwork details */
 .modal-images {
   display: grid;

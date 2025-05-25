@@ -34,61 +34,52 @@
   transform: scaleX(1);
 }
 
-/* Opportunity tab */
-.opportunity-tab[data-tab="exhibitions"]::after {
-  background-color: var(--accent-1); /* Orange */
+/* Opportunity tab colors */
+.opportunity-tab[data-type="all"]::after {
+  background-color: #203356; /* Deep blue */
 }
 
-.opportunity-tab[data-tab="calls"]::after {
-  background-color: var(--accent-4); /* Plum */
+.opportunity-tab[data-type="job"]::after {
+  background-color: #203356; /* Deep blue */
 }
 
-.opportunity-tab[data-tab="residencies"]::after {
-  background-color: var(--accent-3); /* Light blue */
+.opportunity-tab[data-type="internship"]::after {
+  background-color: #E97730; /* Vibrant orange */
 }
 
-.opportunity-tab[data-tab="grants"]::after {
-  background-color: var(--accent-2); /* Pink */
+.opportunity-tab[data-type="residency"]::after {
+  background-color: #AFC9E9; /* Light blue */
 }
 
-.opportunity-tab[data-tab="jobs"]::after {
-  background-color: var(--accent-5); /* Dark blue */
+.opportunity-tab[data-type="saved"]::after {
+  background-color: #777033; /* Olive green */
 }
 
-.opportunity-tab[data-tab="workshops"]::after {
-  background-color: var(--secondary); /* Green */
-}
-
-/* Active tab */
+/* Active tab colors */
 .opportunity-tab.active {
-  color: var(--text-primary);
+  color: #010101; /* Black text */
   font-weight: 700;
 }
 
-.opportunity-tab[data-tab="exhibitions"].active {
-  color: var(--accent-1);
+.opportunity-tab[data-type="all"].active {
+  color: #203356; /* Deep blue */
 }
 
-.opportunity-tab[data-tab="calls"].active {
-  color: var(--accent-4);
+.opportunity-tab[data-type="job"].active {
+  color: #203356; /* Deep blue */
 }
 
-.opportunity-tab[data-tab="residencies"].active {
-  color: var(--accent-3);
+.opportunity-tab[data-type="internship"].active {
+  color: #E97730; /* Vibrant orange */
 }
 
-.opportunity-tab[data-tab="grants"].active {
-  color: var(--accent-2);
+.opportunity-tab[data-type="residency"].active {
+  color: #AFC9E9; /* Light blue */
 }
 
-.opportunity-tab[data-tab="jobs"].active {
-  color: var(--accent-5);
+.opportunity-tab[data-type="saved"].active {
+  color: #777033; /* Olive green */
 }
-
-.opportunity-tab[data-tab="workshops"].active {
-  color: var(--secondary);
-}
-
 
 .saved-filter {
   margin-left: auto;
@@ -102,10 +93,6 @@
 
 .saved-filter-icon {
   margin-right: var(--spacing-xs);
-}
-
-.saved-filter.active {
-  color: gold;
 }
 
 /* Opportunity content */
@@ -152,27 +139,37 @@
 
 /* Color-coded left border for each opportunity type */
 .opportunity-item[data-type="exhibition"] {
-  border-left: 4px solid var(--accent-1); 
+  border-left: 4px solid #E97730; /* Vibrant orange */
 }
 
 .opportunity-item[data-type="call"] {
-  border-left: 4px solid var(--accent-4); 
+  border-left: 4px solid #551B38; /* Rich plum */
 }
 
 .opportunity-item[data-type="residency"] {
-  border-left: 4px solid var(--accent-3); 
+  border-left: 4px solid #AFC9E9; /* Light blue */
 }
 
 .opportunity-item[data-type="grant"] {
-  border-left: 4px solid var(--accent-2);
+  border-left: 4px solid #F4AFC3; /* Soft blush pink */
 }
 
 .opportunity-item[data-type="job"] {
-  border-left: 4px solid var(--accent-5); 
+  border-left: 4px solid #203356; /* Deep blue */
 }
 
 .opportunity-item[data-type="workshop"] {
-  border-left: 4px solid var(--secondary); 
+  border-left: 4px solid #777033; /* Olive green */
+}
+
+.opportunity-item[data-type="internship"] {
+  border-left: 4px solid #E97730; /* Vibrant orange */
+}
+
+/* Special styling for saved opportunities */
+.opportunity-item.saved-opportunity {
+  border-left: 4px solid #777033; /* Olive green */
+  background: linear-gradient(135deg, #f8f9f5 0%, #FBFBF9 100%); /* Subtle olive tint to off-white */
 }
 
 /* Badge styling */
@@ -217,6 +214,11 @@
   color: var(--text-light);
 }
 
+.opportunity-type[data-type="internship"] {
+  background-color: var(--accent-1);
+  color: var(--text-on-orange);
+}
+
 /* Opportunity title with color accents */
 .opportunity-title {
   font-weight: 600;
@@ -225,27 +227,31 @@
 }
 
 .opportunity-item[data-type="exhibition"] .opportunity-title {
-  color: var(--accent-1);
+  color: #E97730; /* Vibrant orange */
 }
 
 .opportunity-item[data-type="call"] .opportunity-title {
-  color: var(--accent-4);
+  color: #551B38; /* Rich plum */
 }
 
 .opportunity-item[data-type="residency"] .opportunity-title {
-  color: var(--accent-3);
+  color: #AFC9E9; /* Light blue */
 }
 
 .opportunity-item[data-type="grant"] .opportunity-title {
-  color: var(--accent-2);
+  color: #F4AFC3; /* Soft blush pink */
 }
 
 .opportunity-item[data-type="job"] .opportunity-title {
-  color: var(--accent-5);
+  color: #203356; /* Deep blue */
 }
 
 .opportunity-item[data-type="workshop"] .opportunity-title {
-  color: var(--secondary);
+  color: #777033; /* Olive green */
+}
+
+.opportunity-item[data-type="internship"] .opportunity-title {
+  color: #E97730; /* Vibrant orange */
 }
 
 /* Opportunity metadata */
@@ -259,6 +265,7 @@
   display: flex;
   align-items: center;
   margin-right: var(--spacing-md);
+  color: var(--text-muted);
 }
 
 .opportunity-date {
@@ -275,6 +282,21 @@
   color: var(--text-body);
   margin-bottom: var(--spacing-xs);
   line-height: 1.5;
+}
+
+/* Saved date styling */
+.saved-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: var(--spacing-xs);
+  font-style: italic;
+  display: flex;
+  align-items: center;
+}
+
+.saved-date::before {
+  content: "Date:";
+  margin-right: var(--spacing-xs);
 }
 
 /* Price and actions */
@@ -318,13 +340,18 @@
   color: var(--secondary);
 }
 
+.opportunity-item[data-type="internship"] .opportunity-price {
+  color: var(--accent-1);
+}
+
 /* Action buttons */
 .action-buttons {
   display: flex;
   gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
-.contact-btn, .save-btn {
+.contact-btn, .save-btn, .delete-btn, .unsave-btn {
   padding: var(--spacing-xs) var(--spacing-sm);
   text-transform: uppercase;
   font-size: 0.8rem;
@@ -334,55 +361,94 @@
   display: flex;
   align-items: center;
   transition: all var(--transition-fast);
+  font-weight: 600;
 }
 
 .btn-icon {
   margin-right: var(--spacing-xs);
 }
 
-/* Opportunity type */
+/* Contact button styling by opportunity type */
 .opportunity-item[data-type="exhibition"] .contact-btn {
-  background-color: var(--accent-1);
-  color: var(--text-on-orange);
+  background-color: #E97730; /* Vibrant orange */
+  color: #FBFBF9; /* Off-white text */
 }
 
 .opportunity-item[data-type="call"] .contact-btn {
-  background-color: var(--accent-4);
-  color: var(--text-on-plum);
+  background-color: #551B38; /* Rich plum */
+  color: #FBFBF9; /* Off-white text */
 }
 
 .opportunity-item[data-type="residency"] .contact-btn {
-  background-color: var(--accent-3);
-  color: var(--text-on-light-blue);
+  background-color: #AFC9E9; /* Light blue */
+  color: #010101; /* Black text */
 }
 
 .opportunity-item[data-type="grant"] .contact-btn {
-  background-color: var(--accent-2);
-  color: var(--text-on-pink);
+  background-color: #F4AFC3; /* Soft blush pink */
+  color: #010101; /* Black text */
 }
 
 .opportunity-item[data-type="job"] .contact-btn {
-  background-color: var(--accent-5);
-  color: var(--text-on-dark-blue);
+  background-color: #203356; /* Deep blue */
+  color: #FBFBF9; /* Off-white text */
 }
 
 .opportunity-item[data-type="workshop"] .contact-btn {
-  background-color: var(--secondary);
-  color: var(--text-light);
+  background-color: #777033; /* Olive green */
+  color: #FBFBF9; /* Off-white text */
+}
+
+.opportunity-item[data-type="internship"] .contact-btn {
+  background-color: #E97730; /* Vibrant orange */
+  color: #FBFBF9; /* Off-white text */
+}
+
+.contact-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 /* Save button styling */
 .save-btn {
-  background-color: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
+  background-color: #777033; /* Olive green */
+  color: #FBFBF9; /* Off-white text */
+  border: 1px solid #777033;
 }
 
-.save-btn:hover,
-.save-btn.saved {
-  background-color: #FFF9E6;
-  border-color: gold;
-  color: goldenrod;
+.save-btn:hover {
+  background-color: #5a5528; /* Darker olive */
+  border-color: #4a4520;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(119, 112, 51, 0.3);
+}
+
+/* Delete button styling */
+.delete-btn {
+  background-color: #551B38; /* Rich plum */
+  color: #FBFBF9; /* Off-white text */
+  border: 1px solid #551B38;
+}
+
+.delete-btn:hover {
+  background-color: #40142a; /* Darker plum */
+  border-color: #330f1f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(85, 27, 56, 0.3);
+}
+
+/* Unsave button styling */
+.unsave-btn {
+  background-color: #203356; /* Deep blue */
+  color: #FBFBF9; /* Off-white text */
+  border: 1px solid #203356;
+}
+
+.unsave-btn:hover {
+  background-color: #192840; /* Darker deep blue */
+  border-color: #121d2d;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(32, 51, 86, 0.3);
 }
 
 /* Deadline indicator */
@@ -448,6 +514,14 @@
 .add-opportunity-section h2 {
   margin-bottom: var(--spacing-md);
   color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.add-opportunity-section h2:hover {
+  color: var(--primary);
 }
 
 /* Individual opportunity page tabs */
@@ -506,6 +580,13 @@
   color: var(--secondary);
 }
 
+.opportunity-detail[data-type="internship"] .opportunity-detail-tab.active {
+  border-bottom-color: var(--accent-1);
+  color: var(--accent-1);
+}
+
+/* Form styling for add opportunity */
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .opportunity-tabs {
@@ -544,5 +625,15 @@
   
   .opportunity-price {
     margin-bottom: 0;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .action-buttons button {
+    width: 100%;
+    margin-bottom: var(--spacing-xs);
   }
 }

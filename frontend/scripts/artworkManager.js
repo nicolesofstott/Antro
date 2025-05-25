@@ -1,4 +1,4 @@
-import { safeGetElement, resizeGridItem } from './profileUtils.js';
+import { safeGetElement, resizeGridItem, initMasonryLayout } from './profileUtils.js';
 import { backendBase } from './profileAuth.js';
 
 // Render artwork preview for Pinterest-style layout
@@ -37,7 +37,6 @@ function renderArtPreview(containerId, artwork) {
   titleDiv.classList.add("art-title");
   titleDiv.textContent = artwork.title || "Untitled";
   
-  // Add dimensions as a subtle caption
   if (artwork.dimensions) {
     const dimensionsSpan = document.createElement("div");
     dimensionsSpan.classList.add("art-dimensions");
@@ -69,7 +68,6 @@ function renderArtPreview(containerId, artwork) {
   card.appendChild(deleteBtn);
   container.appendChild(card);
   
-  // Set initial size (adjusted when image loads)
   card.style.gridRowEnd = "span 30";
   
   return card;
@@ -91,7 +89,6 @@ function openModal(card) {
       console.error("Failed to parse images JSON:", err);
     }
   
-    // Set modal content
     const modalTitle = safeGetElement("modalTitle");
     const modalDimensions = safeGetElement("modalDimensions");
     const modalDescription = safeGetElement("modalDescription");
@@ -113,7 +110,6 @@ function openModal(card) {
         noImagesMessage.style.color = "#777";
         modalImages.appendChild(noImagesMessage);
       } else {
-        // Add each image to the modal
         images.forEach((src, index) => {
           if (!src) return;
           
@@ -276,7 +272,6 @@ async function loadUserArtworks() {
       return;
     }
 
-    // Render each artwork
     artworks.forEach(artwork => {
       renderArtPreview("art-preview", artwork);
     });
@@ -337,7 +332,7 @@ function setupArtworkUpload() {
         console.log(`Form data: ${pair[0]}: ${pair[1]}`);
       }
 
-      // Verify dimensions format
+      // Verify dimensions
       const dimensions = formData.get('dimensions');
       if (dimensions && !/^\d{1,3}x\d{1,3}$/.test(dimensions)) {
         alert("Dimensions must be in format: widthxheight (e.g., 100x200)");

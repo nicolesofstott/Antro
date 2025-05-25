@@ -1,195 +1,365 @@
-const VRGallery = require("../models/vrGallery");
+const VRGallery = require('../models/vrGallery');
+const mongoose = require('mongoose');
 
-// Create VR Gallery
-const createGallery = async (req, res) => {
-  try {
-    const { name, description, size, frameStyle, artworks, isPublic } = req.body;
-    const userId = req.user._id;
-    
-    // Basic validation
-    if (!name) {
-      return res.status(400).json({ error: "Gallery name is required" });
-    }
-    
-    if (!artworks || !Array.isArray(artworks) || artworks.length === 0) {
-      return res.status(400).json({ error: "At least one artwork is required" });
-    }
-    
-    // Create the gallery
-    const newGallery = new VRGallery({
-      user: userId,
-      name,
-      description: description || "",
-      size: size || "medium",
-      frameStyle: frameStyle || "gold",
-      isPublic: isPublic !== undefined ? isPublic : true,
-      artworks: artworks
-    });
-    
-    await newGallery.save();
-    
-    res.status(201).json({
-      message: "VR Gallery created successfully",
-      gallery: newGallery
-    });
-  } catch (error) {
-    console.error("Error creating VR Gallery:", error);
-    res.status(500).json({ error: "Failed to create VR Gallery", details: error.message });
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+function errorResponse(res, status, message, err = null) {
+  if (err) {
+    console.error(`${message}:`, err);
+  } else {
+    console.error(message);
   }
-};
+  return res.status(status).json({ error: message });
+}
+
+// Response with saved status
+function formatGalleryResponse(gallery, userId = null) {
+  if (!gallery) return null;
+  
+  const galleryObj = gallery.toObject ? gallery.toObject() : gallery;
+
+  if (userId) {
+    galleryObj.isSaved = gallery.savedBy && 
+      gallery.savedBy.some(id => id.toString() === userId.toString());
+  }
+  
+  return galleryObj;
+}
 
 // Get all public galleries
-const getAllPublicGalleries = async (req, res) => {
+exports.getAllPublicGalleries = async (req, res) => {
   try {
     const galleries = await VRGallery.find({ isPublic: true })
-      .populate('user', '_id username displayName')
+      .populate('user', 'username profilePicture')
       .sort({ createdAt: -1 });
     
-    res.json(galleries);
-  } catch (error) {
-    console.error("Error fetching public galleries:", error);
-    res.status(500).json({ error: "Failed to fetch galleries", details: error.message });
+    const formattedGalleries = galleries.map(gallery => 
+      formatGalleryResponse(gallery, req.user ? req.user._id : null)
+    );
+    
+    res.json(formattedGalleries);
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to fetch public galleries', err);
   }
 };
 
-// Get user's galleries
-const getUserGalleries = async (req, res) => {
+// Get galleries by user ID
+exports.getGalleriesByUserId = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
     
-    const galleries = await VRGallery.find({ user: userId })
-      .sort({ updatedAt: -1 });
+    if (!isValidObjectId(userId)) {
+      return errorResponse(res, 400, 'Invalid user ID');
+    }
     
-    res.json(galleries);
-  } catch (error) {
-    console.error("Error fetching user galleries:", error);
-    res.status(500).json({ error: "Failed to fetch galleries", details: error.message });
+    const galleries = await VRGallery.find({ 
+      user: userId,
+      isPublic: true 
+    }).sort({ createdAt: -1 });
+    
+    const formattedGalleries = galleries.map(gallery => 
+      formatGalleryResponse(gallery, req.user ? req.user._id : null)
+    );
+    
+    res.json(formattedGalleries);
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to fetch user galleries', err);
   }
 };
 
 // Get gallery by ID
-const getGalleryById = async (req, res) => {
+exports.getGalleryById = async (req, res) => {
   try {
     const galleryId = req.params.id;
     
+    if (!isValidObjectId(galleryId)) {
+      return errorResponse(res, 400, 'Invalid gallery ID');
+    }
+    
     const gallery = await VRGallery.findById(galleryId)
-      .populate('user', '_id username displayName');
+      .populate('user', 'username profilePicture')
+      .populate('artworks.artworkId');
     
     if (!gallery) {
-      return res.status(404).json({ error: "Gallery not found" });
+      return errorResponse(res, 404, 'Gallery not found');
     }
     
-    // Check if gallery is private and not owned by the requesting user
-    if (!gallery.isPublic && gallery.user._id.toString() !== req.user?._id?.toString()) {
-      return res.status(403).json({ error: "You don't have permission to view this gallery" });
+    if (!gallery.isPublic && 
+        (!req.user || req.user._id.toString() !== gallery.user.toString())) {
+      return errorResponse(res, 403, 'You do not have permission to view this gallery');
     }
     
-    res.json(gallery);
-  } catch (error) {
-    console.error("Error fetching gallery:", error);
-    res.status(500).json({ error: "Failed to fetch gallery", details: error.message });
+    const formattedGallery = formatGalleryResponse(gallery, req.user ? req.user._id : null);
+    
+    res.json(formattedGallery);
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to fetch gallery', err);
+  }
+};
+
+// Get current user's galleries
+exports.getUserGalleries = async (req, res) => {
+  try {
+    console.log('GET /api/galleries/mine - User authentication check');
+    
+    if (!req.user || !req.user._id) {
+      return errorResponse(res, 401, 'Authentication required');
+    }
+    
+    console.log(`Fetching galleries for user ${req.user._id}`);
+    
+    const galleries = await VRGallery.find({ user: req.user._id })
+      .sort({ createdAt: -1 });
+    
+    console.log(`Found ${galleries.length} galleries`);
+    
+    const formattedGalleries = galleries.map(gallery => 
+      formatGalleryResponse(gallery, req.user._id)
+    );
+    
+    res.json(formattedGalleries);
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to fetch user galleries', err);
+  }
+};
+
+// Create a new gallery
+exports.createGallery = async (req, res) => {
+  try {
+    console.log('POST /api/galleries/create - Creating gallery');
+    
+    if (!req.user || !req.user._id) {
+      return errorResponse(res, 401, 'Authentication required');
+    }
+    
+    const { name, description, size, frameStyle, isPublic, artworks } = req.body;
+    
+    if (!name) {
+      return errorResponse(res, 400, 'Gallery name is required');
+    }
+    
+    console.log(`Creating gallery "${name}" for user ${req.user._id}`);
+    
+    const newGallery = new VRGallery({
+      user: req.user._id,
+      name,
+      description: description || '',
+      size: size || 'medium',
+      frameStyle: frameStyle || 'gold',
+      isPublic: isPublic !== undefined ? isPublic : true,
+      artworks: artworks || [],
+      savedBy: [] 
+    });
+    
+    await newGallery.save();
+    
+    console.log(`Gallery "${name}" created with ID ${newGallery._id}`);
+    
+    res.status(201).json(formatGalleryResponse(newGallery, req.user._id));
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to create gallery', err);
   }
 };
 
 // Update gallery
-const updateGallery = async (req, res) => {
+exports.updateGallery = async (req, res) => {
   try {
     const galleryId = req.params.id;
-    const { name, description, size, frameStyle, artworks, isPublic } = req.body;
-    const userId = req.user._id;
     
-    // Find gallery
+    if (!isValidObjectId(galleryId)) {
+      return errorResponse(res, 400, 'Invalid gallery ID');
+    }
+    
     const gallery = await VRGallery.findById(galleryId);
     
     if (!gallery) {
-      return res.status(404).json({ error: "Gallery not found" });
+      return errorResponse(res, 404, 'Gallery not found');
     }
     
-    // Check if the user is the owner
-    if (gallery.user.toString() !== userId.toString()) {
-      return res.status(403).json({ error: "You don't have permission to update this gallery" });
+    if (gallery.user.toString() !== req.user._id.toString()) {
+      return errorResponse(res, 403, 'You do not have permission to update this gallery');
     }
     
-    // Update fields
+    const { name, description, size, frameStyle, isPublic, artworks } = req.body;
+    
     if (name) gallery.name = name;
     if (description !== undefined) gallery.description = description;
     if (size) gallery.size = size;
     if (frameStyle) gallery.frameStyle = frameStyle;
     if (isPublic !== undefined) gallery.isPublic = isPublic;
-    if (artworks && Array.isArray(artworks) && artworks.length > 0) {
-      gallery.artworks = artworks;
-    }
+    if (artworks) gallery.artworks = artworks;
     
     gallery.updatedAt = Date.now();
     
     await gallery.save();
     
-    res.json({
-      message: "Gallery updated successfully",
-      gallery
-    });
-  } catch (error) {
-    console.error("Error updating gallery:", error);
-    res.status(500).json({ error: "Failed to update gallery", details: error.message });
+    res.json(formatGalleryResponse(gallery, req.user._id));
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to update gallery', err);
   }
 };
 
 // Delete gallery
-const deleteGallery = async (req, res) => {
+exports.deleteGallery = async (req, res) => {
   try {
     const galleryId = req.params.id;
-    const userId = req.user._id;
+    
+    if (!isValidObjectId(galleryId)) {
+      return errorResponse(res, 400, 'Invalid gallery ID');
+    }
+  
+    const gallery = await VRGallery.findById(galleryId);
+    
+    if (!gallery) {
+      return errorResponse(res, 404, 'Gallery not found');
+    }
+    
+    if (gallery.user.toString() !== req.user._id.toString()) {
+      return errorResponse(res, 403, 'You do not have permission to delete this gallery');
+    }
+    
+    await VRGallery.findByIdAndDelete(galleryId);
+    
+    res.json({ message: 'Gallery deleted successfully' });
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to delete gallery', err);
+  }
+};
+
+// Get user's saved galleries
+exports.getSavedGalleries = async (req, res) => {
+  try {
+    console.log('GET /api/galleries/saved - Fetching saved galleries');
+    
+    if (!req.user || !req.user._id) {
+      return errorResponse(res, 401, 'Authentication required');
+    }
+    
+    console.log(`Fetching saved galleries for user ${req.user._id}`);
+    
+    const savedGalleries = await VRGallery.find({ 
+      savedBy: req.user._id 
+    })
+    .populate('user', 'username profilePicture')
+    .sort({ createdAt: -1 });
+    
+    console.log(`Found ${savedGalleries.length} saved galleries`);
+    
+    const galleryData = savedGalleries.map(gallery => {
+      const galleryObj = formatGalleryResponse(gallery, req.user._id);
+      galleryObj.isSaved = true;
+      return galleryObj;
+    });
+    
+    res.json(galleryData);
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to fetch saved galleries', err);
+  }
+};
+
+// Save a gallery
+exports.saveGallery = async (req, res) => {
+  try {
+    const galleryId = req.params.id;
+    
+    if (!isValidObjectId(galleryId)) {
+      return errorResponse(res, 400, 'Invalid gallery ID');
+    }
+    
+    console.log(`User ${req.user._id} saving gallery ${galleryId}`);
     
     // Find the gallery
     const gallery = await VRGallery.findById(galleryId);
     
     if (!gallery) {
-      return res.status(404).json({ error: "Gallery not found" });
+      return errorResponse(res, 404, 'Gallery not found');
     }
     
-    // Check if the user is the owner
-    if (gallery.user.toString() !== userId.toString()) {
-      return res.status(403).json({ error: "You don't have permission to delete this gallery" });
+    if (!gallery.savedBy) {
+      gallery.savedBy = [];
     }
     
-    await VRGallery.findByIdAndDelete(galleryId);
+    // Check if user has already saved this gallery
+    if (gallery.savedBy.some(id => id.toString() === req.user._id.toString())) {
+      return res.json({ message: 'Gallery already saved', isSaved: true });
+    }
     
-    res.json({ message: "Gallery deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting gallery:", error);
-    res.status(500).json({ error: "Failed to delete gallery", details: error.message });
+    gallery.savedBy.push(req.user._id);
+    await gallery.save();
+    
+    res.json({ message: 'Gallery saved successfully', isSaved: true });
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to save gallery', err);
   }
 };
 
-// Get galleries by user ID
-const getGalleriesByUserId = async (req, res) => {
+// Unsave a gallery
+exports.unsaveGallery = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const galleryId = req.params.id;
     
-    // Show private galleries too if viewing own profile
-    const isOwnProfile = req.user && req.user._id.toString() === userId;
-    
-    let query = { user: userId };
-    if (!isOwnProfile) {
-      query.isPublic = true;
+    if (!isValidObjectId(galleryId)) {
+      return errorResponse(res, 400, 'Invalid gallery ID');
     }
     
-    const galleries = await VRGallery.find(query)
-      .sort({ updatedAt: -1 });
+    console.log(`User ${req.user._id} unsaving gallery ${galleryId}`);
     
-    res.json(galleries);
-  } catch (error) {
-    console.error("Error fetching user galleries:", error);
-    res.status(500).json({ error: "Failed to fetch galleries", details: error.message });
+    // Find the gallery
+    const gallery = await VRGallery.findById(galleryId);
+    
+    if (!gallery) {
+      return errorResponse(res, 404, 'Gallery not found');
+    }
+    
+    // Check if gallery has savedBy array if so remove
+    if (!gallery.savedBy) {
+      gallery.savedBy = [];
+      await gallery.save();
+      return res.json({ message: 'Gallery was not saved', isSaved: false });
+    }
+    
+    gallery.savedBy = gallery.savedBy.filter(
+      savedId => savedId.toString() !== req.user._id.toString()
+    );
+    
+    await gallery.save();
+    
+    res.json({ message: 'Gallery unsaved successfully', isSaved: false });
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to unsave gallery', err);
   }
 };
 
-module.exports = {
-  createGallery,
-  getAllPublicGalleries,
-  getUserGalleries,
-  getGalleryById,
-  updateGallery,
-  deleteGallery,
-  getGalleriesByUserId
+//  Get gallery by name
+exports.getGalleryByName = async (req, res) => {
+  try {
+    const galleryName = req.params.name;
+    
+    if (!galleryName) {
+      return errorResponse(res, 400, 'Gallery name is required');
+    }
+    
+    console.log(`Fetching gallery by name: ${galleryName}`);
+    
+    const gallery = await VRGallery.findOne({ name: galleryName })
+      .populate('user', 'username profilePicture')
+      .populate('artworks.artworkId');
+    
+    if (!gallery) {
+      return errorResponse(res, 404, 'Gallery not found');
+    }
+    
+    if (!gallery.isPublic && 
+        (!req.user || req.user._id.toString() !== gallery.user.toString())) {
+      return errorResponse(res, 403, 'You do not have permission to view this gallery');
+    }
+    
+    const formattedGallery = formatGalleryResponse(gallery, req.user ? req.user._id : null);
+    
+    res.json(formattedGallery);
+  } catch (err) {
+    return errorResponse(res, 500, 'Failed to fetch gallery by name', err);
+  }
 };

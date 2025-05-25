@@ -11,14 +11,18 @@ router.get('/', artworkController.getAllArtworks);
 router.get('/:id', artworkController.getArtworkById);
 router.delete('/:id', authMiddleware, artworkController.deleteArtwork);
 
-// New route to get artworks by user ID (public)
+// Get artworks by user ID
 router.get('/user/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
     console.log(`Fetching artworks for user: ${userId}`);
     
     const Artwork = require('../models/artwork');
-    const artworks = await Artwork.find({ user: userId });
+    
+    // Validate userId format
+    const artworks = await Artwork.find({ user: userId })
+      .populate('user', 'username displayName fullName email');
+    
     console.log(`Found ${artworks.length} artworks`);
 
     const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -41,10 +45,37 @@ router.get('/user/:userId', async (req, res) => {
             `${baseUrl}/${imgPath}`;
         }) : [];
       
+      let width = 100;
+      let height = 100;
+      
+      if (art.dimensions && typeof art.dimensions === 'string') {
+        const dimensionMatch = art.dimensions.match(/^(\d{1,3})x(\d{1,3})$/);
+        if (dimensionMatch) {
+          const parsedWidth = parseInt(dimensionMatch[1], 10);
+          const parsedHeight = parseInt(dimensionMatch[2], 10);
+          
+          if (parsedWidth > 0 && parsedHeight > 0) {
+            width = parsedWidth;
+            height = parsedHeight;
+          }
+        }
+      }
+      
+      let artistName = 'Unknown Artist';
+      if (art.user && typeof art.user === 'object') {
+        artistName = art.user.displayName || 
+                   art.user.fullName || 
+                   art.user.username || 
+                   'Unknown Artist';
+      }
+      
       return {
         ...art,
         mainImageUrl,
-        extraImageUrls
+        extraImageUrls,
+        width,
+        height,
+        artist: artistName 
       };
     });
     

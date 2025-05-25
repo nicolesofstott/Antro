@@ -4,6 +4,7 @@ const User = require('../models/user');
 const Artwork = require('../models/artwork');
 const VRGallery = require('../models/vrGallery');
 
+// Search route to handle user, artwork, and gallery searches
 router.get('/search', async (req, res) => {
   try {
     const query = req.query.q;
@@ -21,7 +22,6 @@ router.get('/search', async (req, res) => {
       ]
     }).select('username fullName displayName profilePic _id email');
 
-    // Determine which profiles are artists based on email domain
     const formattedProfiles = profileMatches.map(profile => {
       const profileObj = profile.toObject();
       profileObj.isArtist = profile.email && profile.email.endsWith('@arts.ac.uk');
@@ -66,7 +66,6 @@ router.get('/search', async (req, res) => {
     .populate('user', '_id username displayName')
     .select('name description size frameStyle user createdAt _id');
 
-    // Format the gallery responses
     const formattedGalleries = galleryMatches.map(gallery => {
       const galleryObj = gallery.toObject();
       

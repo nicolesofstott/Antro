@@ -37,6 +37,12 @@ const vrGallerySchema = new mongoose.Schema({
     default: true
   },
 
+  // Add savedBy array to track users who saved this gallery
+  savedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+
   artworks: [{
     artworkId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -79,3 +85,4 @@ vrGallerySchema.pre('save', function(next) {
 });
 
 module.exports = mongoose.model('VRGallery', vrGallerySchema);
+
